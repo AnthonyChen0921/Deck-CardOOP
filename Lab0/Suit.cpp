@@ -1,0 +1,63 @@
+/*
+    Suit.cpp
+    Author: @Anthony Chen
+    Email: chenerdong@wustl.edu
+    Date: Aug 31, 2022
+*/
+#include "Suit.h"
+
+using namespace std;
+
+/**
+ * @brief operator<<
+ * @param os
+ * @param const suit
+ * @return os
+ */
+std::ostream &operator<<(std::ostream &os, const Suit &suit)
+{
+    // "C" for clubs, "D" for diamonds, "H" for hearts, "S" spades, or "?" for undefined
+    switch (suit)
+    {
+    case Suit::clubs:
+        os << "C";
+        break;
+    case Suit::diamonds:
+        os << "D";
+        break;
+    case Suit::hearts:
+        os << "H";
+        break;
+    case Suit::spades:
+        os << "S";
+        break;
+    default:
+        os << "?";
+        break;
+    }
+    return os;
+}
+
+/**
+ * @brief operator++
+ * @param suit
+ * @return suit
+ */
+Suit &operator++(Suit &suit)
+{
+    // if suit is not undefined, increment it to the next suit
+    if (suit != Suit::undefined)
+    {
+        if (suit == Suit::spades)
+        {
+            suit = Suit::clubs;
+        }
+        else
+        {
+            suit = static_cast<Suit>(static_cast<int>(suit) + 1);
+        }
+    }
+
+    // if suit is undefined it should remain undefined
+    return suit;
+}
