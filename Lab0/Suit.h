@@ -4,7 +4,7 @@
     Email: chenerdong@wustl.edu
     Date: Aug 31, 2022
 */
-
+#pragma once
 #include <string>
 #include <ostream>
 

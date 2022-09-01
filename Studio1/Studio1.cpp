@@ -54,8 +54,9 @@ ostream &operator<<(ostream &os, const Weekday &weekday)
  * @param weekday
  * @return weekday
  */
-Weekday &operator++(Weekday &weekday)
+Weekday operator++(Weekday &weekday, int)
 {
+    Weekday original = weekday;
     if (weekday == Weekday::Sunday)
     {
         weekday = Weekday::Monday;
@@ -64,7 +65,81 @@ Weekday &operator++(Weekday &weekday)
     {
         weekday = static_cast<Weekday>(static_cast<int>(weekday) + 1);
     }
-    return weekday;
+    return original;
+}
+
+/**
+ * @brief postfix operator--
+ * @param weekday
+ * @return weekday
+ */
+Weekday operator--(Weekday &weekday, int){
+    Weekday original = weekday;
+    if(weekday == Weekday::Monday){
+        weekday = Weekday::Sunday;
+    }
+    else{
+        weekday = static_cast<Weekday>(static_cast<int>(weekday) - 1);
+    }
+    return original;
+}
+
+
+ostream &operator<<(ostream &os, const Pressure &pressure)
+{
+    switch (pressure)
+    {
+    case Pressure::lo:
+        os << "Low";
+        break;
+    case Pressure::med:
+        os << "Med";
+        break;
+    case Pressure::hi:
+        os << "High";
+        break;
+    case Pressure::pop:
+        os << "Pop";
+        break;
+    default:
+        os << " ";
+        break;
+    }
+    os << " ";
+    return os;
+}
+
+/**
+ * @brief postfix operator++
+ * @param pressure
+ * @return pressure
+ */
+Pressure operator++(Pressure &pressure, int)
+{
+    Pressure original = pressure;
+    if (pressure == Pressure::pop)
+        return pressure;
+    else
+    {
+        pressure = static_cast<Pressure>(static_cast<int>(pressure) + 1);
+    }
+    return original;
+}
+
+/**
+ * @brief postfix operator--
+ * @param weekday
+ * @return weekday
+ */
+Pressure operator--(Pressure &pressure, int){
+    Pressure original = pressure;
+    if(pressure == Pressure::lo || pressure == Pressure::pop){
+        return pressure;
+    }
+    else{
+        pressure = static_cast<Pressure>(static_cast<int>(pressure) - 1);
+    }
+    return original;
 }
 
 int main()
@@ -93,13 +168,27 @@ int main()
     // do while loop to cycle through the days of the week
     do
     {
-        cout << today << endl;
-        ++today;
+        cout << today++ << endl;
     } while (today != Weekday::Monday);
     cout << "------------------------" << endl;
     cout << "      Done Testing      " << endl;
     cout << "------------------------" << endl;
 
+    // test postfix operator--
+    cout << "------------------------" << endl;
+    cout << "Testing postfix operator--" << endl;
+    cout << "------------------------" << endl;
+    today = Weekday::Sunday;
+    do
+    {
+        cout << today-- << endl;
+    } while (today != Weekday::Sunday);
+    cout << "------------------------" << endl;
+    cout << "      Done Testing      " << endl;
+    cout << "------------------------" << endl;
+
+
+    // 
 
     return 0;
 }

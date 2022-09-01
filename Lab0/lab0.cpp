@@ -13,6 +13,7 @@
 
 using namespace std;
 
+
 int main() {
     // test Stuit
     Suit s = Suit::spades;
@@ -23,10 +24,8 @@ int main() {
     // test Card
     Card<Rank, Suit> c(Rank::ace, Suit::spades);
     cout << c << endl;
-    c.rank = Rank::king;
-    cout << c << endl;
-    c.suit = Suit::diamonds;
-    cout << c << endl;
+    // cout << c.suit << endl;
+
     return 0;
 }
 

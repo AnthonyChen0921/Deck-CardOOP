@@ -4,7 +4,7 @@
     Email: chenerdong@wustl.edu
     Date: Sep 1, 2022
 */
-
+#pragma once
 
 #include <ostream>
 
@@ -21,10 +21,25 @@ enum class Weekday
     Sunday
 };
 
+// declare the enum class Pressure
+enum class Pressure{
+    lo,
+    med,
+    hi,
+    pop
+};
+
 // declare shift operator<< for Weekday
 std::ostream &operator<<(std::ostream &os, const Weekday &weekday);
 
 
 // declare postfix operator++ for Weekday
-Weekday &operator++(Weekday &weekday);
+Weekday operator++(Weekday &weekday, int);
+
+
+// declare the postfix operator-- for Weekday
+Weekday operator--(Weekday &weekday, int);
+
+// declare the prefix operator-- for Pressure
+Pressure operator--(Pressure &pressure, int);
 
