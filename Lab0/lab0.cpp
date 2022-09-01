@@ -9,22 +9,24 @@
 #include <iostream>
 #include "Suit.h"
 #include "Card_T.h"
-#include <ostream>
+#include "PinochleDeck.h"
 
 using namespace std;
 
 
 int main() {
     // test Stuit
-    Suit s = Suit::spades;
+    Suit s = Suit::clubs;
     cout << s << endl;
     ++s;
     cout << s << endl;
 
     // test Card
     Card<Rank, Suit> c(Rank::ace, Suit::spades);
-    cout << c << endl;
-    // cout << c.suit << endl;
+
+    // test PinochleDeck
+    PinochleDeck pd;
+    pd.print(cout);
 
     return 0;
 }

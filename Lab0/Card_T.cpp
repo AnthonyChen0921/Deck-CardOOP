@@ -18,7 +18,7 @@
 template <typename R, typename S>
 std::ostream &operator<<(std::ostream &os, const Card<R, S> &card)
 {
-    os << static_cast<int>(card.rank) << card.suit;
+    os << card.rank << card.suit;
     return os;
 }
 

@@ -48,14 +48,7 @@ Suit &operator++(Suit &suit)
     // if suit is not undefined, increment it to the next suit
     if (suit != Suit::undefined)
     {
-        if (suit == Suit::spades)
-        {
-            suit = Suit::clubs;
-        }
-        else
-        {
-            suit = static_cast<Suit>(static_cast<int>(suit) + 1);
-        }
+        suit = static_cast<Suit>(static_cast<int>(suit) + 1);
     }
 
     // if suit is undefined it should remain undefined
