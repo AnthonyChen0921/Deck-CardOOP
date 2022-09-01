@@ -23,6 +23,11 @@ int main() {
     // test Card
     Card<Rank, Suit> c(Rank::ace, Suit::spades);
     cout << c << endl;
-
+    c.rank = Rank::king;
+    cout << c << endl;
+    c.suit = Suit::diamonds;
+    cout << c << endl;
     return 0;
 }
+
+

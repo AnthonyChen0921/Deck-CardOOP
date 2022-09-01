@@ -12,7 +12,7 @@ const int FILE_NOT_FOUND = 2; //  Fail code: file not found
 
 const int expectedArgs = 2; // Expected Input Argument
 
-int main(int argc, char* argv[]) { // argc and argv not used, but their types are specified
+int main(int argc, char** argv) { // argc and argv not used, but their types are specified
 
     // Check for correct number of arguments
 	const char* program = argv[0];
