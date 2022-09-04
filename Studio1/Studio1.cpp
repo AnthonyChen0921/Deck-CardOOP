@@ -1,7 +1,7 @@
 /*
     Studio1.cpp
-    Author: @Anthony Chen
-    Email: chenerdong@wustl.edu
+    Author: @Anthony Chen, @Yunlai Chen
+    Email: chenerdong@wustl.edu, c.yunlai@wustl.edu
     Date: Sep 1, 2022
 */
 
@@ -142,9 +142,12 @@ Pressure operator--(Pressure &pressure, int){
     return original;
 }
 
+
+
+
 int main()
 {
-    // test shift operator<<
+    // test shift operator For Weekday<<
     cout << "------------------------" << endl;
     cout << "Testing shift operator<<" << endl;
     cout << "------------------------" << endl;
@@ -161,7 +164,7 @@ int main()
 
     // test postfix operator++
     cout << "------------------------" << endl;
-    cout << "Testing postfix operator++" << endl;
+    cout << "Testing postfix operator++ for Weekday" << endl;
     cout << "------------------------" << endl;
     Weekday today = Weekday::Monday;
 
@@ -176,19 +179,61 @@ int main()
 
     // test postfix operator--
     cout << "------------------------" << endl;
-    cout << "Testing postfix operator--" << endl;
+    cout << "Testing postfix operator-- for Weekday" << endl;
     cout << "------------------------" << endl;
     today = Weekday::Sunday;
     do
     {
         cout << today-- << endl;
     } while (today != Weekday::Sunday);
+
+
+
+
+//////////////////////////////////////////////////////////////////////
+   // test shift operator For Pressure<<
+    cout << "------------------------" << endl;
+    cout << "Testing shift operator<<" << endl;
+    cout << "------------------------" << endl;
+    cout << Pressure::lo << endl;
+    cout << Pressure::med << endl;
+    cout << Pressure::hi << endl;
+    cout << Pressure::pop << endl;
+    cout << "------------------------" << endl;
+    cout << "      Done Testing      " << endl;
+    cout << "------------------------" << endl;
+
+    // test postfix operator++
+    cout << "------------------------" << endl;
+    cout << "Testing postfix operator++ for Pressure" << endl;
+    cout << "------------------------" << endl;
+    Pressure pressure = Pressure::lo;
+
+    // do while loop to cycle through the days of the week
+    for(int i=0;i<5;i++)
+        cout << pressure++ << endl;
+    cout << "------------------------" << endl;
+    cout << "      Done Testing      " << endl;
+    cout << "------------------------" << endl;
+
+    // test postfix operator--
+    cout << "------------------------" << endl;
+    cout << "Testing postfix operator-- for Pressure, starting from high" << endl;
+    cout << "------------------------" << endl;
+    pressure = Pressure::hi;
+    for(int i=0;i<5;i++)
+        cout << pressure-- << endl;
+
+    pressure = Pressure::pop;
+    for(int i=0;i<3;i++)
+        cout << pressure-- << endl;
     cout << "------------------------" << endl;
     cout << "      Done Testing      " << endl;
     cout << "------------------------" << endl;
 
 
-    // 
+
+
 
     return 0;
 }

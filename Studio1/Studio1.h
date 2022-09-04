@@ -21,25 +21,24 @@ enum class Weekday
     Sunday
 };
 
-// declare the enum class Pressure
-enum class Pressure{
-    lo,
-    med,
-    hi,
-    pop
-};
-
 // declare shift operator<< for Weekday
 std::ostream &operator<<(std::ostream &os, const Weekday &weekday);
 
 
 // declare postfix operator++ for Weekday
-Weekday operator++(Weekday &weekday, int);
+Weekday &operator++(Weekday &weekday);
+
+// declare the enum class Pressure
+
+enum class Pressure{
+    lo, med, hi, pop
+};
+
+// declare shift operator<< for Pressure
+
+std::ostream &operator<<(std::ostream &os, const Pressure &pressure);
 
 
-// declare the postfix operator-- for Weekday
-Weekday operator--(Weekday &weekday, int);
+// declare postfix operator++ for Pressure
 
-// declare the prefix operator-- for Pressure
-Pressure operator--(Pressure &pressure, int);
-
+Pressure &operator++(Pressure &pressure);
