@@ -20,16 +20,16 @@ std::ostream &operator<<(std::ostream &os, const Suit &suit)
     switch (suit)
     {
     case Suit::clubs:
-        os << "C";
+        os << "♣";
         break;
     case Suit::diamonds:
-        os << "D";
+        os << "♦";
         break;
     case Suit::hearts:
-        os << "H";
+        os << "♥";
         break;
     case Suit::spades:
-        os << "S";
+        os << "♠";
         break;
     default:
         os << "?";
