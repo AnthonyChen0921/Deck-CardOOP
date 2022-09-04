@@ -13,32 +13,32 @@ using namespace std;
 /**
  * @brief shift operator<<
  * @param os
- * @param const PinochleRanks
+ * @param const PinochleRank
  * @return os
  */
-ostream &operator<<(ostream &os, const PinochleRanks &rank){
+ostream &operator<<(ostream &os, const PinochleRank &rank){
     // "9" for nine, "J" for jack, "Q" for queen, "K" for king, "T" for ten, "A" for ace, or "?" for undefined
     switch (rank)
     {
-    case PinochleRanks::nine:
+    case PinochleRank::nine:
         os << "9";
         break;
-    case PinochleRanks::jack:
+    case PinochleRank::jack:
         os << "J";
         break;
-    case PinochleRanks::queen:
+    case PinochleRank::queen:
         os << "Q";
         break;
-    case PinochleRanks::king:
+    case PinochleRank::king:
         os << "K";
         break;
-    case PinochleRanks::ten:
+    case PinochleRank::ten:
         os << "10";
         break;
-    case PinochleRanks::ace:
+    case PinochleRank::ace:
         os << "A";
         break;
-    case PinochleRanks::undefined:
+    case PinochleRank::undefined:
         os << "?";
         break;
     }
@@ -49,13 +49,13 @@ ostream &operator<<(ostream &os, const PinochleRanks &rank){
 /**
  * @brief prefix operator++
  * 
- * @return PinochleRanks& 
+ * @return PinochleRank& 
  */
-PinochleRanks &operator++(PinochleRanks &rank){
+PinochleRank &operator++(PinochleRank &rank){
     // if rank is not undefined, increment it to the next rank
-    if (rank != PinochleRanks::undefined)
+    if (rank != PinochleRank::undefined)
     {
-        rank = static_cast<PinochleRanks>(static_cast<int>(rank) + 1);
+        rank = static_cast<PinochleRank>(static_cast<int>(rank) + 1);
     }
     return rank;
 }
@@ -64,12 +64,15 @@ PinochleRanks &operator++(PinochleRanks &rank){
 // default constructor twice pushes back a card of each valid suit of each valid rank 
 PinochleDeck::PinochleDeck()
 {
-    
-    for(PinochleRanks r = PinochleRanks::nine; r <= PinochleRanks::ace; ++r)
+    // each rank
+    for(PinochleRank r = PinochleRank::nine; r <= PinochleRank::ace; ++r)
     {
+        // each suit
         for(Suit s = Suit::clubs; s <= Suit::spades; ++s)
         {
-            cards.push_back(Card<PinochleRanks, Suit>(r, s));
+            // twice push back
+            cards.push_back(Card<PinochleRank, Suit>(r, s));
+            cards.push_back(Card<PinochleRank, Suit>(r, s));
         }
     }
 }
@@ -87,6 +90,7 @@ void PinochleDeck::print(std::ostream &os){
     for(auto c : cards){
         os << c << " ";
     }
+    os << endl;
 }
 
 

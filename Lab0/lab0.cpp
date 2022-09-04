@@ -10,6 +10,7 @@
 #include "Suit.h"
 #include "Card_T.h"
 #include "PinochleDeck.h"
+#include "HoldEmDeck.h"
 
 using namespace std;
 
@@ -27,6 +28,10 @@ int main() {
     // test PinochleDeck
     PinochleDeck pd;
     pd.print(cout);
+
+    // test HoldEmDeck
+    HoldEmDeck hd;
+    hd.print(cout);
 
     return 0;
 }

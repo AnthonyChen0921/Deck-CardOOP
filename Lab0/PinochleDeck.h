@@ -14,7 +14,7 @@
 #include <vector>
 
 // enum class Ranks for PinochleDeck
-enum class PinochleRanks
+enum class PinochleRank
 {
     nine,
     jack,
@@ -37,11 +37,11 @@ public:
 
 private:
     // member variable: vector with cards parameterized with the rank and suit
-    std::vector<Card<PinochleRanks, Suit>> cards;
+    std::vector< Card<PinochleRank, Suit> > cards;
 };
 
 // overloaded operator<<
-std::ostream &operator<<(std::ostream &os, const PinochleRanks &rank);
+std::ostream &operator<<(std::ostream &os, const PinochleRank &rank);
 
-// overloaded prefix operator++ for PinochleRanks
-PinochleRanks &operator++(PinochleRanks &rank);
+// overloaded prefix operator++ for PinochleRank
+PinochleRank &operator++(PinochleRank &rank);
