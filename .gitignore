@@ -1,0 +1,6 @@
+# ignore ALL .log files
+*.log
+
+vscode
+
+FL2022.code-workspace
