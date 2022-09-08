@@ -1,20 +1,19 @@
 #		The name of the executable file you want to build
-EXECUTABLE	= lab0
+EXECUTABLE	= studio3
 
 #		Source (.cpp) files you want to compile
 #		(NOTE: Don't include header (.h) files, or any source (.cpp) files
 #		that only contain template class method definitions.)
-CMPL_SRCS	= Suit.cpp lab0.cpp PinochleDeck.cpp HoldEmDeck.cpp 
+CMPL_SRCS	= Studio1.cpp #Studio3.cpp
 
 #               Source files containing only template class method definitions
-TMPL_SRCS	= Card_T.cpp
+TMPL_SRCS	= 
 
 #               Header (.h) files
-HEADER_FILES    = Suit.h Card_T.h Deck.h PinochleDeck.h HoldEmDeck.h 
+HEADER_FILES    = Studio1.h
 
 #               Any special flags that should be set for compilation
-SPECIAL_FLAGS  = -std=c++17 -DTEMPLATE_HEADERS_INCLUDE_SOURCE
-#SPECIAL_FLAGS  = -std=c++17
+SPECIAL_FLAGS  = -std=c++17
 
 #               Any additional libraries that need to be linked in (e.g., -lsocket -lnsl)
 LIBS    =       
@@ -58,32 +57,32 @@ all: $(EXECUTABLE)
 
 #               Construct the executable
 $(EXECUTABLE): $(OBJS)
-	$(CXX) -o $(EXECUTABLE) $(CCFLAGS) $(OBJS) $(LIBS)
+		$(CXX) -o $(EXECUTABLE) $(CCFLAGS) $(OBJS) $(LIBS)
 
 #		Remove all junk that might be lying around
 clean:
-	-rm -f *.o core *.bak *~
+		-rm -f *.o core *.bak *~
 
 realclean: clean
-	-rm -f $(EXECUTABLE)
+		-rm -f $(EXECUTABLE)
 
 #		Change the Makefile to reflect the correct dependencies.
 depend:
-	-rm -f ccdep
-	-rm -f eddep
-	$(CXX) -xM $(CCFLAGS) $(CMPL_SRCS) > ccdep
-	sed -n '1,/^# DO NOT DELETE THIS LINE/p' Makefile > eddep
-	echo \#\#\# >> eddep
-	cat ccdep >> eddep
-	cp Makefile Makefile.bak
-	mv eddep Makefile
-	rm ccdep
+		-rm -f ccdep
+			-rm -f eddep
+				$(CXX) -xM $(CCFLAGS) $(CMPL_SRCS) > ccdep
+					sed -n '1,/^# DO NOT DELETE THIS LINE/p' Makefile > eddep
+						echo \#\#\# >> eddep
+							cat ccdep >> eddep
+								cp Makefile Makefile.bak
+									mv eddep Makefile
+										rm ccdep
 
 .SUFFIXES: .cpp
-.cpp.o:
-	$(COMPILE.cc) $(CCFLAGS) $(OUTPUT_OPTION) $<
+	.cpp.o:
+		$(COMPILE.cc) $(CCFLAGS) $(OUTPUT_OPTION) $<
 .cpp:
-	$(LINK.cc) $(LDFLAGS) -o $@ $< $(LDLIBS)
+		$(LINK.cc) $(LDFLAGS) -o $@ $< $(LDLIBS)
 
 main.o: $(USER_SRCS) Makefile
 
