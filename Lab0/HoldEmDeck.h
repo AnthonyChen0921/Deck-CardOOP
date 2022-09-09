@@ -1,7 +1,7 @@
 /*
     HoldEmDeck.h
-    Author: @Anthony Chen
-    Email: chenerdong@wustl.edu
+    Author: @Anthony Chen @Yunlai Chen
+    Email: chenerdong@wustl.edu c.yunlai@wustl.edu
     Date: Sep 4, 2022
 */
 

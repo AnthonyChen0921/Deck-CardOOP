@@ -8,6 +8,9 @@
 #include "Studio1.h"
 #include <iostream>
 #include <set>
+#include <algorithm>
+#include <iterator>
+#include <vector>
 
 using namespace std;
 
@@ -160,6 +163,67 @@ int main()
     
     Pressure p = Pressure::lo;
     cout << p << endl;
+
+    // question 4
+    // declare associate container set for weekday
+    set<Weekday> weekdays;
+    weekdays.insert(Weekday::Monday);
+    weekdays.insert(Weekday::Tuesday);
+    weekdays.insert(Weekday::Wednesday);
+    weekdays.insert(Weekday::Thursday);
+    weekdays.insert(Weekday::Friday);
+    
+    // print out the weekdays
+    cout << "printing out the weekdays" << endl;
+    for (auto it = weekdays.begin(); it != weekdays.end(); ++it)
+    {
+        cout << *it;
+    }
+    cout << endl;
+    cout << "weekdays printed" << endl << endl;
+
+    // declare associate container set for weekday2
+    set<Weekday> weekdays2;
+    weekdays2.insert(Weekday::Monday);
+    weekdays2.insert(Weekday::Friday);
+    weekdays2.insert(Weekday::Saturday);
+    weekdays2.insert(Weekday::Sunday);
+
+    // question 5
+    // declare intersection set
+    set<Weekday> intersectionSet;
+
+    //set_intersection
+    set_intersection(weekdays.begin(), weekdays.end(), weekdays2.begin(), weekdays2.end(), inserter(intersectionSet, intersectionSet.end()));
+
+
+    // print out the intersection
+    cout << "printing out the intersection" << endl;
+    for (auto it = intersectionSet.begin(); it != intersectionSet.end(); ++it)
+    {
+        cout << *it;
+    }
+    cout << endl;
+    cout << "intersection printed" << endl << endl;
+
+    // question 6
+    // declare union set
+    set<Weekday> unionSet;
+
+    //set_union
+    set_union(weekdays.begin(), weekdays.end(), weekdays2.begin(), weekdays2.end(), inserter(unionSet, unionSet.end()));
+
+    // print out the union
+    cout << "printing out the union" << endl;
+    for (auto it = unionSet.begin(); it != unionSet.end(); ++it)
+    {
+        cout << *it;
+    }
+    cout << endl;
+    cout << "union printed" << endl << endl;
+    
+
+
 
 
     return 0;
