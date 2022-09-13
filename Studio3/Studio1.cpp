@@ -160,9 +160,6 @@ Pressure &operator++(Pressure &pressure){
 
 int main()
 {
-    
-    Pressure p = Pressure::lo;
-    cout << p << endl;
 
     // question 4
     // declare associate container set for weekday
@@ -182,6 +179,8 @@ int main()
     cout << endl;
     cout << "weekdays printed" << endl << endl;
 
+
+    // question 5
     // declare associate container set for weekday2
     set<Weekday> weekdays2;
     weekdays2.insert(Weekday::Monday);
@@ -189,7 +188,7 @@ int main()
     weekdays2.insert(Weekday::Saturday);
     weekdays2.insert(Weekday::Sunday);
 
-    // question 5
+    
     // declare intersection set
     set<Weekday> intersectionSet;
 
