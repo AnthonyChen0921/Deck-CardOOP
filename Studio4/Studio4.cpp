@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <functional>
+#include "Compose_T.h"
 
 using namespace std;
 
@@ -48,13 +49,25 @@ int main()
         Question 5
     */
     // std::function cpp reference page: https://en.cppreference.com/w/cpp/utility/functional/function
-    std::function<float(float)> sn = [](float x)
+    std::function<float(float)> sn = [](auto x)
     { return std::sin(x); };
-    std::function<float(float)> cn = [](float x)
+    std::function<float(float)> cn = [](auto x)
     { return std::cos(x); };
     // call sn(cn(f1))
     cout << "sn(cn(f1)): " << sn(cn(f1)) << endl;
 
+    /*
+        Question 6
+    */
+    auto res = compose(sn, cn);
+    cout << "compose(sn, cn)(f1): " << res(f1) << endl;
+
+    /*
+        Question 7
+    */
+   // declare auto variable initialized by previous variable and f1 into std::bind
+    auto res2 = std::bind(res, f1);
+    cout << "std::bind(compose(sn,cn), f1)(): " << res2() << endl;
 
     return 0;
 }
