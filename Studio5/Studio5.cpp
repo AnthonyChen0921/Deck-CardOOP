@@ -46,7 +46,5 @@ int main()
 
     //cout << "n.x = " << n.getX() << " and n.y = " << n.getY() << endl;
 
-
-
     return 0;
 }
