@@ -9,7 +9,7 @@
 #define DECK_H
 
 #include <string>
-#include <ostream>
+#include <iostream>
 #include "CardSet_T.h"
 #include <random>
 #include <algorithm>
@@ -26,9 +26,11 @@ public:
     // destructor
     ~Deck() {}
 
-    // member function
+    // member function shuffle
     void shuffle();
 
+    // member function collect
+    void collect(CardSet<R, S> &cardset);
 };
 
 #if defined (DECK_H)

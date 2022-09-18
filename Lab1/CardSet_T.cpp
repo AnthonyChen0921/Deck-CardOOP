@@ -20,7 +20,7 @@ void CardSet<R, S>::print(std::ostream &os, size_t lb)
 {
     size_t count = 0;
     // iterate through cards vector
-    for (auto it = cards.begin(); it != cards.end(); ++it){
+    for (auto it = CardSet<R,S>::cards.begin(); it != CardSet<R,S>::cards.end(); ++it){
         // insert a space after one card
         os << *it << " ";
         count++;
@@ -29,4 +29,43 @@ void CardSet<R, S>::print(std::ostream &os, size_t lb)
             os << std::endl;
         }
     }
+    os << std::endl;
+}
+
+
+/**
+ * @brief right shift operator takes nonconst reference of CardSet and return reference of CardSet
+ *        if object is empty, throw an exception: a standard runtime_error
+ *        Otherwise, Push a card at the back,
+ *        Pop the card
+ * 
+ * @tparam R Rank type
+ * @tparam S Suit type
+ * @param cs CardSet object
+ * @return CardSet<R, S>& 
+ */
+template <typename R, typename S>
+CardSet<R, S> &CardSet<R, S>::operator>>(CardSet<R, S> &cardset)
+{
+    // if object is empty, throw runtime_error
+    if (cards.size() == 0){
+        throw std::runtime_error("CardSet is empty");
+    }
+    cardset.cards.push_back(cards.back());
+    cards.pop_back();
+    return cardset;
+}
+
+/**
+ * @brief check if the cardset is empty
+ * 
+ * @tparam R Rank type
+ * @tparam S Suit type
+ * @return true 
+ * @return false 
+ */
+template <typename R, typename S>
+bool CardSet<R, S>::is_empty()
+{
+    return cards.size() == 0;
 }

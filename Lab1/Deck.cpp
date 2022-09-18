@@ -26,3 +26,26 @@ void Deck<R, S>::shuffle()
     // scope into CardSet namespace to access cards vector
     std::shuffle(CardSet<R,S>::cards.begin(), CardSet<R,S>::cards.end(), generator);
 }
+
+
+/**
+ * @brief collect() takes a reference to a CardSet object and adds all the cards in the CardSet to the deck
+ *        if given Cardset is empty, try to catch the exception.
+ * 
+ * @tparam R 
+ * @tparam S 
+ * @param cardset 
+ */
+template <typename R, typename S>
+void Deck<R, S>::collect(CardSet<R, S> &cardset)
+{
+    // exception handling reference: https://cplusplus.com/doc/tutorial/exceptions/
+    try{
+        while (!cardset.is_empty()){
+            cardset >> *this;
+        }
+    }
+    catch (std::runtime_error &e){
+        std::cout << e.what() << std::endl;
+    }
+}

@@ -20,12 +20,18 @@ protected:
     // protected member variables vector of cards
     std::vector< Card<R, S> > cards;
 public:
-    // print function
-    void print(std::ostream &os, size_t lb);
     // constructor
     CardSet() {}
     // destructor
     ~CardSet() {}
+    // print function
+    void print(std::ostream &os, size_t lb);
+    // right shift operator
+    CardSet<R, S> &operator>>(CardSet<R, S> &cs);
+    // is empty function
+    bool is_empty();
+
+
 };
 
 #if defined (CARDSET_T_H)
