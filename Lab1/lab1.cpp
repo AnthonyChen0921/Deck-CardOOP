@@ -78,7 +78,7 @@ int main() {
     cout << "Test PinochleDeck Class default constructor and print function" << endl;
     cout << "====================================================" << endl;
     PinochleDeck pd;
-    cout << "Printing PinochleDeck pd: ";
+    cout << "Printing PinochleDeck pd: " << endl;
     pd.print(cout, 4);
         
     // test HoldEmDeck Class default constructor and print function
@@ -86,7 +86,23 @@ int main() {
     cout << "Test HoldEmDeck Class default constructor and print function" << endl;
     cout << "====================================================" << endl;
     HoldEmDeck hd;
-    cout << "Printing HoldEmDeck hd: ";
+    cout << "Printing HoldEmDeck hd: " << endl;
+    hd.print(cout, 4);
+
+    // test PinochleDeck Class shuffle function
+    cout << "====================================================" << endl;
+    cout << "Test PinochleDeck Class shuffle function" << endl;
+    cout << "====================================================" << endl;
+    pd.shuffle();
+    cout << "Printing PinochleDeck pd after shuffle: " << endl;
+    pd.print(cout, 4);
+
+    // test HoldEmDeck Class shuffle function
+    cout << "====================================================" << endl;
+    cout << "Test HoldEmDeck Class shuffle function" << endl;
+    cout << "====================================================" << endl;
+    hd.shuffle();
+    cout << "Printing HoldEmDeck hd after shuffle: " << endl;
     hd.print(cout, 4);
 
  

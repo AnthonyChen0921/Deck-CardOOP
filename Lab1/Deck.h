@@ -5,10 +5,14 @@
     Date: Aug 31, 2022
 */
 
-#pragma once
+#ifndef DECK_H
+#define DECK_H
+
 #include <string>
 #include <ostream>
 #include "CardSet_T.h"
+#include <random>
+#include <algorithm>
 
 
 
@@ -22,7 +26,16 @@ public:
     // destructor
     ~Deck() {}
 
+    // member function
+    void shuffle();
+
 };
+
+#if defined (DECK_H)
+      #include "Deck.cpp"
+#endif /* TEMPLATE_HEADERS_INCLUDE_SOURCE */
+
+#endif
 
 
 
