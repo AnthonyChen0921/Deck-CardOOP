@@ -32,9 +32,9 @@ void Deck<R, S>::shuffle()
  * @brief collect() takes a reference to a CardSet object and adds all the cards in the CardSet to the deck
  *        if given Cardset is empty, try to catch the exception.
  * 
- * @tparam R 
- * @tparam S 
- * @param cardset 
+ * @tparam R Rank type
+ * @tparam S Suit type
+ * @param cardset CardSet object
  */
 template <typename R, typename S>
 void Deck<R, S>::collect(CardSet<R, S> &cardset)

@@ -11,11 +11,13 @@
 #include "Card_T.h"
 #include "PinochleDeck.h"
 #include "HoldEmDeck.h"
+#include "PinochleGame.h"
+#include "Game.h"
 
 using namespace std;
 
 
-int main() {
+int main(int argc, const char *argv[]) {
 
     // LAB1
     PinochleDeck pd;
@@ -52,6 +54,15 @@ int main() {
     cs.print(cout, 4);
     cout << "Printing PinochleDeck pd after right shift operator>>: " << endl;
     pd.print(cout, 4);
+
+    // test PinochleGame Class
+    cout << "====================================================" << endl;
+    cout << "Test PinochleGame Class" << endl;
+    cout << "====================================================" << endl;
+    // pass in the number of players and player name
+    PinochleGame pg(argc, argv);
+    pg.play();
+    
 
  
 
