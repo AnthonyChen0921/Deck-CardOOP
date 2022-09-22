@@ -28,5 +28,9 @@ public:
     virtual int play();
     // print out the hands of each player
     void printPlayersHand();
+    // ask the player want to end the game or not
+    int askEndGame();
+    // collect the cards from the players to the deck
+    void collectCards();
 };
 

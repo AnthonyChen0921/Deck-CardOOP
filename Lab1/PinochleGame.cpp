@@ -72,6 +72,31 @@ void PinochleGame::printPlayersHand(){
 }
 
 /**
+ * @brief collectCards() function collect the cards from the players to the deck
+ * 
+ */
+void PinochleGame::collectCards(){
+    for (int i = 0; i < static_cast<int>(hands.size()); i++){
+        deck.collect(hands[i]);
+    }
+}
+
+/**
+ * @brief askEndGame() function ask the player want to end the game or not
+ * 
+ * @return int return 1 if want to end
+ */
+int PinochleGame::askEndGame(){
+    cout << "Do you want to end the game? (y/n)" << endl;
+    string input;
+    cin >> input;
+    if (input == "y"){
+        return 1;
+    }
+    return 0;
+}
+
+/**
  * @brief play() function 
  * 
  * @return 
@@ -83,20 +108,18 @@ int PinochleGame::play(){
     // print a string to the standard output stream that asks the user whether or not to end the game
     // read in a string from the standard input stream, 
     // if the string is "y" or "Y", then return 0, otherwise repeat the loop
-    string input;
     while (true)
     {
+        // shuffle the deck
         deck.shuffle();
+        // deal the cards
         deal();
+        // print out the hands of each player
         printPlayersHand();
-        for (int i = 0; i < static_cast<int>(hands.size()); i++)
-        {
-            deck.collect(hands[i]);
-        }
-        cout << "Do you want to end the game? (y/n)" << endl;
-        cin >> input;
-        if (input == "y" || input == "Y")
-        {
+        // collect the cards from the players to the deck
+        collectCards();
+        // ask the player want to end the game or not
+        if (askEndGame()){
             return 0;
         }
     }
