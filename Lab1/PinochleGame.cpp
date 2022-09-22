@@ -31,28 +31,28 @@ PinochleGame::PinochleGame(int argc, const char *argv[]) : Game(argc, argv){
  * 
  */
 void PinochleGame::deal(){
+    // calculate number of cards to deal in a round
+    size_t numCards = 3 * players.size();
     // deal 3 cards to each player until the deck is empty
-    while (!deck.is_empty()){
+    while (deck.getSize() >= numCards){
         for (int i = 0; i < static_cast<int>(hands.size()); i++)
         {
-            try{ 
-                deck >> hands[i];
-                deck >> hands[i];
-                deck >> hands[i];  
-            }
-            catch (const exception &e){
-                break;
-            }
+            deck >> hands[i];
+            deck >> hands[i];
+            deck >> hands[i];  
             // Problem: currently if the deck has 2 cards left, shifting 3 cards will be unsafe, cauing runtime error
 
             // Solution1: add size() function in the deck class to check the size of the deck
             //             -- result: the deck will have 2 cards leftover
+            // Accpted
 
             // Solution2: use try catch block to catch the runtime error and break the loop
             //             -- result: the deck will have all cards on player's hand but unevenly distributed
+            // Infeasible, rejected
 
             // Solution3: deal with the number of the card before call deal() function, and make sure the number of the card is divisible by 3
             //             -- result: the deck will have 2 cards leftover, add helper function, complicated
+            // Feasible, rejected
         }
     }
     cout << "Dealing cards..." << endl;
@@ -67,6 +67,7 @@ void PinochleGame::printPlayersHand(){
     {
         cout << players[i] << "'s hand: " << endl;
         hands[i].print(cout, 4);
+        cout << endl;
     }
 }
 
@@ -76,12 +77,28 @@ void PinochleGame::printPlayersHand(){
  * @return 
  */
 int PinochleGame::play(){
-    // shuffle the deck
-    //deck.shuffle();
-    // deal cards
-    deal();
-    // print out the hands of each player
-    printPlayersHand();
-    return 0;
+    // repeatly call shuffle() and deal()
+    // printout the hands of each player by calling printPlayersHand()
+    // use Deck's collect() function to repeatly move the cards back out of each player's hand into the deck
+    // print a string to the standard output stream that asks the user whether or not to end the game
+    // read in a string from the standard input stream, 
+    // if the string is "y" or "Y", then return 0, otherwise repeat the loop
+    string input;
+    while (true)
+    {
+        deck.shuffle();
+        deal();
+        printPlayersHand();
+        for (int i = 0; i < static_cast<int>(hands.size()); i++)
+        {
+            deck.collect(hands[i]);
+        }
+        cout << "Do you want to end the game? (y/n)" << endl;
+        cin >> input;
+        if (input == "y" || input == "Y")
+        {
+            return 0;
+        }
+    }
 }
 

@@ -30,6 +30,7 @@ public:
     CardSet<R, S> &operator>>(CardSet<R, S> &cs);
     // is empty function
     bool is_empty();
+    size_t getSize();
 
 
 };

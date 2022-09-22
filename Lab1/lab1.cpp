@@ -18,7 +18,7 @@ using namespace std;
 
 
 int main(int argc, const char *argv[]) {
-
+    /*
     // LAB1
     PinochleDeck pd;
     HoldEmDeck hd;
@@ -54,6 +54,7 @@ int main(int argc, const char *argv[]) {
     cs.print(cout, 4);
     cout << "Printing PinochleDeck pd after right shift operator>>: " << endl;
     pd.print(cout, 4);
+    */
 
     // test PinochleGame Class
     cout << "====================================================" << endl;

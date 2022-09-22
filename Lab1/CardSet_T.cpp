@@ -69,3 +69,16 @@ bool CardSet<R, S>::is_empty()
 {
     return cards.size() == 0;
 }
+
+/**
+ * @brief return the size of the cardset
+ * 
+ * @tparam R Rank type
+ * @tparam S Suit type
+ * @return size_t 
+ */
+template <typename R, typename S>
+size_t CardSet<R, S>::getSize()
+{
+    return cards.size();
+}
