@@ -35,14 +35,22 @@ void PinochleGame::deal(){
     while (!deck.is_empty()){
         for (int i = 0; i < static_cast<int>(hands.size()); i++)
         {
-            deck >> hands[i];
-            deck >> hands[i];
-            deck >> hands[i];
+            try{ 
+                deck >> hands[i];
+                deck >> hands[i];
+                deck >> hands[i];  
+            }
+            catch (const exception &e){
+                break;
+            }
             // Problem: currently if the deck has 2 cards left, shifting 3 cards will be unsafe, cauing runtime error
+
             // Solution1: add size() function in the deck class to check the size of the deck
             //             -- result: the deck will have 2 cards leftover
+
             // Solution2: use try catch block to catch the runtime error and break the loop
             //             -- result: the deck will have all cards on player's hand but unevenly distributed
+
             // Solution3: deal with the number of the card before call deal() function, and make sure the number of the card is divisible by 3
             //             -- result: the deck will have 2 cards leftover, add helper function, complicated
         }
@@ -69,7 +77,7 @@ void PinochleGame::printPlayersHand(){
  */
 int PinochleGame::play(){
     // shuffle the deck
-    deck.shuffle();
+    //deck.shuffle();
     // deal cards
     deal();
     // print out the hands of each player
