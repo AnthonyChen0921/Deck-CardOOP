@@ -33,6 +33,9 @@ void CardSet<R, S>::print(std::ostream &os, size_t lb)
 }
 
 
+
+
+
 /**
  * @brief right shift operator takes nonconst reference of CardSet and return reference of CardSet
  *        if object is empty, throw an exception: a standard runtime_error
@@ -56,6 +59,9 @@ CardSet<R, S> &CardSet<R, S>::operator>>(CardSet<R, S> &cardset)
     return cardset;
 }
 
+
+
+
 /**
  * @brief check if the cardset is empty
  * 
@@ -69,6 +75,9 @@ bool CardSet<R, S>::is_empty()
 {
     return cards.size() == 0;
 }
+
+
+
 
 /**
  * @brief return the size of the cardset

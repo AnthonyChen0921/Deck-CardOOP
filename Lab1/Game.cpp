@@ -20,9 +20,13 @@ using namespace std;
 // parse the command line arguments of players' name using shift opertaor and initialize the players vector
 // updates the argc and argv arguments so that only capture players' name
 Game::Game(int argc, const char *argv[]){
-    // check if the number of players is less than 2
-    if (argc < 3){
+    // check if the number of players is less than minPlayers
+    if (argc <= GameRules::minPlayer){
         throw invalid_argument("Not enough players");
+    }
+    // check if the number of players is more than maxPlayers
+    if (argc > GameRules::maxPlayer){
+        throw invalid_argument("Too many players");
     }
     // if argc is 3, 4, 5, 6, 7, push back the players' name to the players vector
     for (int i = 1; i < argc; i++)
@@ -32,3 +36,18 @@ Game::Game(int argc, const char *argv[]){
     }
 }
 
+
+/**
+ * @brief askEndGame() function ask the player want to end the game or not
+ * 
+ * @return int return 1 if want to end
+ */
+int Game::askEndGame(){
+    cout << "Do you want to end the game? (y/n)" << endl;
+    string input;
+    cin >> input;
+    if (input == "y" || input == "Y" || input == "yes" || input == "Yes"){
+        return message::quit_game;
+    }
+    return message::continue_game;
+}

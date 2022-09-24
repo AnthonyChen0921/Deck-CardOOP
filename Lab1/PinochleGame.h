@@ -8,6 +8,7 @@
 #pragma once
 #include "Game.h"
 #include "PinochleDeck.h"
+#include "function.h"
 #include <vector>
 
 class PinochleGame : public Game
@@ -26,10 +27,10 @@ public:
     PinochleGame(int argc, const char *argv[]);
     // virtual play()
     virtual int play();
+
+    /** helpers **/
     // print out the hands of each player
     void printPlayersHand();
-    // ask the player want to end the game or not
-    int askEndGame();
     // collect the cards from the players to the deck
     void collectCards();
 };

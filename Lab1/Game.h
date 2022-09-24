@@ -9,6 +9,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include "function.h"
 
 class Game
 {
@@ -19,8 +20,14 @@ protected:
 public:
     // constructor
     Game(int argc, const char *argv[]);
+
+    // member functions
     // pure virtual function play()
     virtual int play() = 0;
+
+    // helper functions
+    // ask if player wants to end the game
+    int askEndGame();
 };
 
 // overloaded operator<<

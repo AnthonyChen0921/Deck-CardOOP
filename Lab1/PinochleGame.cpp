@@ -32,8 +32,9 @@ PinochleGame::PinochleGame(int argc, const char *argv[]) : Game(argc, argv){
  */
 void PinochleGame::deal(){
     // calculate number of cards to deal in a round
-    size_t numCards = 3 * players.size();
+    size_t numCards = PinochleGameGameRules::packet_of_cards * players.size();
     // deal 3 cards to each player until the deck is empty
+    cout << "Dealing cards..." << endl;
     while (deck.getSize() >= numCards){
         for (int i = 0; i < static_cast<int>(hands.size()); i++)
         {
@@ -55,7 +56,6 @@ void PinochleGame::deal(){
             // Feasible, rejected
         }
     }
-    cout << "Dealing cards..." << endl;
 }
 
 /**
@@ -81,33 +81,16 @@ void PinochleGame::collectCards(){
     }
 }
 
-/**
- * @brief askEndGame() function ask the player want to end the game or not
- * 
- * @return int return 1 if want to end
- */
-int PinochleGame::askEndGame(){
-    cout << "Do you want to end the game? (y/n)" << endl;
-    string input;
-    cin >> input;
-    if (input == "y"){
-        return 1;
-    }
-    return 0;
-}
+
 
 /**
  * @brief play() function 
  * 
- * @return 
+ * @return possible return values: 
+ *              message::end_game
+ *              
  */
 int PinochleGame::play(){
-    // repeatly call shuffle() and deal()
-    // printout the hands of each player by calling printPlayersHand()
-    // use Deck's collect() function to repeatly move the cards back out of each player's hand into the deck
-    // print a string to the standard output stream that asks the user whether or not to end the game
-    // read in a string from the standard input stream, 
-    // if the string is "y" or "Y", then return 0, otherwise repeat the loop
     while (true)
     {
         // shuffle the deck
@@ -119,8 +102,8 @@ int PinochleGame::play(){
         // collect the cards from the players to the deck
         collectCards();
         // ask the player want to end the game or not
-        if (askEndGame()){
-            return 0;
+        if (askEndGame() == message::quit_game){
+            return message::end_game;
         }
     }
 }
