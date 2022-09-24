@@ -13,11 +13,15 @@
 #include "HoldEmDeck.h"
 #include "PinochleGame.h"
 #include "Game.h"
+#include "function.h"
 
 using namespace std;
 
 
 int main(int argc, const char *argv[]) {
+
+    // program name
+    const char *program_name = argv[0];
     /*
     // LAB1
     PinochleDeck pd;
@@ -61,8 +65,20 @@ int main(int argc, const char *argv[]) {
     cout << "Test PinochleGame Class" << endl;
     cout << "====================================================" << endl;
     // pass in the number of players and player name
-    PinochleGame pg(argc, argv);
-    pg.play();
+    // try catch block to catch invalid_argument exception
+    try {
+        PinochleGame pg(argc, argv);
+        pg.play();
+    }
+    catch (const invalid_argument& e) {
+        // if caught not enough players, print out the usage message
+        if (e.what() == string("Not enough players")) {
+            usageMessage(program_name);
+        }
+        else {
+            cout << e.what() << endl;
+        }
+    }
     
 
  

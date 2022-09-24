@@ -9,3 +9,13 @@
 
 using namespace std;
 
+
+/**
+ * @brief function to print the usage message
+ * 
+ * @param program_name 
+ */
+int usageMessage(const char *program_name){
+    cout << "Usage: " << program_name << " <Pinochle / HoldEm> "<< " <number of players>" << endl;
+    return message::success;
+}
