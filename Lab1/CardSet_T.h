@@ -28,8 +28,9 @@ public:
     void print(std::ostream &os, size_t lb);
     // right shift operator
     CardSet<R, S> &operator>>(CardSet<R, S> &cs);
-    // is empty function
+    // is_empty function
     bool is_empty();
+    // getSize function
     size_t getSize();
 
 

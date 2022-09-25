@@ -11,12 +11,12 @@ using namespace std;
 
 /**
  * @brief constructor build a vector of players
+ *        parse the command line arguments of players' name using shift opertaor and initialize the players vector
+ *        updates the argc and argv arguments so that only capture players' name
  * 
  * @param argc number of players
  * @param argv name of players
  */
-// parse the command line arguments of players' name using shift opertaor and initialize the players vector
-// updates the argc and argv arguments so that only capture players' name
 Game::Game(int argc, const char *argv[]){
     // check if the number of players is less than minPlayers
     if (argc <= GameRules::minPlayer){
