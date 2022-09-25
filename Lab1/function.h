@@ -17,17 +17,13 @@
 
 enum arrayIndex{
     programName = 0,
-    firstPlayer = 1,
-    secondPlayer = 2,
-    thirdPlayer = 3,
-    fourthPlayer = 4,
-    fifthPlayer = 5,
-    sixthPlayer = 6,
-};
-
-enum GameRules{
-    minPlayer = 2,
-    maxPlayer = 8,
+    gameName = 1,
+    firstPlayer = 2,
+    secondPlayer = 3,
+    thirdPlayer = 4,
+    fourthPlayer = 5,
+    fifthPlayer = 6,
+    sixthPlayer = 7,
 };
 
 enum message {
@@ -35,6 +31,15 @@ enum message {
     quit_game,
     end_game,
     continue_game,
+    invalid_game_name,
+    no_game_name,
+};
+
+enum GameRules{
+    minPlayer = 2,
+    maxPlayer = 8,
+    print_format_4 = 4,
+    print_format_5 = 5,
 };
 
 enum PinochleGameGameRules{
@@ -44,7 +49,6 @@ enum PinochleGameGameRules{
 
 enum HoldEmGameRules{
     num_of_flop_cards = 3,
-    num_printed_board_cards = 5,
 };
 
 

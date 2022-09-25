@@ -28,8 +28,8 @@ Game::Game(int argc, const char *argv[]){
     if (argc > GameRules::maxPlayer){
         throw invalid_argument("Too many players");
     }
-    // if argc is 4, 5, 6, 7, push back the players' name to the players vector
-    for (int i = 2; i < argc; i++)
+    // push back the players' name to the players vector
+    for (int i = arrayIndex::firstPlayer; i < argc; i++)
     {
         players.push_back(argv[i]);
         //cout << "Player " << i << ": " << players[i-1] << endl;

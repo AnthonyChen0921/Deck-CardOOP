@@ -66,7 +66,7 @@ void PinochleGame::printPlayersHand(){
     for (int i = 0; i < static_cast<int>(hands.size()); i++)
     {
         cout << players[i] << "'s hand: " << endl;
-        hands[i].print(cout, 4);
+        hands[i].print(cout, GameRules::print_format_4);
         cout << endl;
     }
 }

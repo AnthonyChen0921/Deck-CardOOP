@@ -16,6 +16,6 @@ using namespace std;
  * @param program_name 
  */
 int usageMessage(const char *program_name){
-    cout << "Usage: " << program_name << " <Pinochle / HoldEm> "<< " <number of players>" << endl;
+    cout << "Usage: " << program_name << " <Pinochle / HoldEm> "<< " <player1 player2 ...>" << endl;
     return message::success;
 }

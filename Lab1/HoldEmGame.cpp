@@ -73,7 +73,7 @@ void HoldEmGame::printPlayersHand(){
     for (int i = 0; i < static_cast<int>(hands.size()); i++)
     {
         cout << players[i] << "'s hand: " << endl;
-        hands[i].print(cout, 4);
+        hands[i].print(cout, GameRules::print_format_4);
         cout << endl;
     }
 }
@@ -102,7 +102,7 @@ void HoldEmGame::collectCardsFromBoard() {
  */
 void HoldEmGame::printBoard(string s) {
     cout << s << endl;
-    board.print(cout, HoldEmGameRules::num_printed_board_cards);
+    board.print(cout, GameRules::print_format_5);
     cout << endl;
 }
  
@@ -111,7 +111,8 @@ void HoldEmGame::printBoard(string s) {
 /**
  * @brief play function: play the game
  * 
- * @return int 
+ * @return int possible return values: 
+ *              message::end_game
  */
 int HoldEmGame::play() {
     // repeat the following steps until the game is over:
