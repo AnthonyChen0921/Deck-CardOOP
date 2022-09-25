@@ -42,6 +42,11 @@ enum PinochleGameGameRules{
     packet_of_cards = 3,
 };
 
+enum HoldEmGameRules{
+    num_of_flop_cards = 3,
+    num_printed_board_cards = 5,
+};
+
 
 // declare the helper function
 int usageMessage(const char* programName);

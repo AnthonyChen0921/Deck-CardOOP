@@ -75,7 +75,7 @@ void PinochleGame::printPlayersHand(){
  * @brief collectCards() function collect the cards from the players to the deck
  * 
  */
-void PinochleGame::collectCards(){
+void PinochleGame::collectCardsFromPlayer(){
     for (int i = 0; i < static_cast<int>(hands.size()); i++){
         deck.collect(hands[i]);
     }
@@ -100,7 +100,7 @@ int PinochleGame::play(){
         // print out the hands of each player
         printPlayersHand();
         // collect the cards from the players to the deck
-        collectCards();
+        collectCardsFromPlayer();
         // ask the player want to end the game or not
         if (askEndGame() == message::quit_game){
             return message::end_game;

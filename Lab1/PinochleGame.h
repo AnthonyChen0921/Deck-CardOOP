@@ -32,6 +32,6 @@ public:
     // print out the hands of each player
     void printPlayersHand();
     // collect the cards from the players to the deck
-    void collectCards();
+    void collectCardsFromPlayer();
 };
 
