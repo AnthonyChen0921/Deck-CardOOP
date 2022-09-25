@@ -29,13 +29,14 @@ enum arrayIndex{
 };
 
 enum message {
-    success,
+    SUCCESS,
+    WRRONG_USAGE,
+    GAME_NOT_CREATED,
     quit_game,
     end_game,
     continue_game,
     invalid_game_name,
     no_game_name,
-    WRRONG_USAGE,
 };
 
 enum GameRules{

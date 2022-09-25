@@ -72,9 +72,15 @@ int main(int argc, const char *argv[]) {
     
     // call create() function to create/play a game
     shared_ptr<Game> game = create(argc, argv);
-    game->play();
+    if(game){
+        game->play();
+    }
+    else{
+        cout << "Game is not created" << endl;
+        return message::GAME_NOT_CREATED;
+    }
 
-    return message::success;
+    return message::SUCCESS;
 }
 
 
