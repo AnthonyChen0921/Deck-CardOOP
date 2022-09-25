@@ -7,9 +7,7 @@
 
 #include "Game.h"
 
-
 using namespace std;
-
 
 /**
  * @brief constructor build a vector of players
@@ -35,7 +33,6 @@ Game::Game(int argc, const char *argv[]){
         //cout << "Player " << i << ": " << players[i-1] << endl;
     }
 }
-
 
 /**
  * @brief askEndGame() function ask the player want to end the game or not
