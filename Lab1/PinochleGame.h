@@ -25,6 +25,8 @@ protected:
 public:
     // constructor
     PinochleGame(int argc, const char *argv[]);
+    // virtual destructor
+    virtual ~PinochleGame() {}
     // virtual play()
     virtual int play();
 

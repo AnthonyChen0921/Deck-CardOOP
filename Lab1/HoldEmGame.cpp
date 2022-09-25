@@ -125,6 +125,7 @@ int HoldEmGame::play() {
         // deal cards to each player's hand
         deal();
         printPlayersHand();
+        
         // deal cards to the board in 3 rounds
         deal();
         printBoard("Flop: ");

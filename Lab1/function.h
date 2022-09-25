@@ -24,6 +24,8 @@ enum arrayIndex{
     fourthPlayer = 5,
     fifthPlayer = 6,
     sixthPlayer = 7,
+    minArg = 2,
+    maxArg = 11,
 };
 
 enum message {
@@ -33,6 +35,7 @@ enum message {
     continue_game,
     invalid_game_name,
     no_game_name,
+    WRRONG_USAGE,
 };
 
 enum GameRules{
@@ -45,10 +48,14 @@ enum GameRules{
 enum PinochleGameGameRules{
     num_of_players = 4,
     packet_of_cards = 3,
+    numPlayerPinochle = 6,
 };
 
 enum HoldEmGameRules{
     num_of_flop_cards = 3,
+    // 2-9 players, 1 program name, 1 game name
+    minPlayerHoldEm = 4, // 2 players + 2
+    maxPlayerHoldEm = 11, // 9 players + 2
 };
 
 

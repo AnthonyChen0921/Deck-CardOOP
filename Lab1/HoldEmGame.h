@@ -36,9 +36,11 @@ protected:
 public:
     // constructor
     HoldEmGame(int argc, const char *argv[]);
+    // virtual destructor
+    virtual ~HoldEmGame() {}
     // virtual play()
     virtual int play();
-    
+
     // helper functions
     // print out the hands of each player
     void printPlayersHand();
