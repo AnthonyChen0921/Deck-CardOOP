@@ -61,6 +61,8 @@ enum HoldEmGameRules{
 
 // declare the helper function
 int usageMessage(const char* programName);
+// print game logo
+void printLogo(std::string gameName);
 
 
 

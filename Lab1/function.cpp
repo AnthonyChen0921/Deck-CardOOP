@@ -9,13 +9,27 @@
 
 using namespace std;
 
-
 /**
  * @brief function to print the usage message
- * 
- * @param program_name 
+ *
+ * @param program_name
  */
-int usageMessage(const char *program_name){
-    cout << "Usage: " << program_name << " <Pinochle / HoldEm> "<< " <4 players / 2-8 players>" << endl;
+int usageMessage(const char *program_name)
+{
+    cout << "Usage: " << program_name << " <Pinochle / HoldEm> "
+         << " <4 players / 2-8 players>" << endl;
     return message::WRRONG_USAGE;
+}
+
+// printLogo() function prints the logo of the game
+void printLogo(string s)
+{
+        cout << "====================================================" << endl;
+    if (s == "Pinochle"){
+        cout << "=                 PinochleGame                     =" << endl;
+    }
+    else if (s == "HoldEm"){
+        cout << "=                 HoldEmGame                       =" << endl;
+    }
+        cout << "====================================================" << endl;
 }
