@@ -8,8 +8,8 @@
 class BaseClass{
 public:
     BaseClass();
-    ~BaseClass();
-    void DoSomething();
+    virtual ~BaseClass();
+    virtual void DoSomething();
 };
 
 #endif

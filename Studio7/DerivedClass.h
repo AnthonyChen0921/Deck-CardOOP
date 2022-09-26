@@ -12,8 +12,8 @@
 class DerivedClass : public BaseClass{
 public:
     DerivedClass();
-    ~DerivedClass();
-    void DoSomething();
+    virtual ~DerivedClass();
+    virtual void DoSomething();
 };
 
 #endif
