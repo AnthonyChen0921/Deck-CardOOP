@@ -41,7 +41,17 @@ DerivedClass::DoSomething()
 derived reference initialized using derived object, do something
 DerivedClass::DoSomething()
 ----------------------------------------------------------------------------
+
+Explaination: 
+     After adding the virtual keyword to the baseclass DoSomething function, the output of the second part is changed,
+     which means the derivedclass DoSomething function is called when the base reference is initialized using derived object.
+
+
 5. It behaves similarly with 4.
+
+Explaination:
+     After replace object declaration with pointers, the output remains the same as 4,
+     because they basically use the same object constructor.
 
 6. 
 ----------------------------------------------------------------------------
@@ -93,5 +103,10 @@ BaseClass destructor
 DerivedClass destructor
 BaseClass destructor
 ----------------------------------------------------------------------------
+
+destructor must be virtual because:
+1. As we declare the derivedClass object using baseClass pointer, when we call delete, the destructor of baseClass will be called.
+2. The type of the pointer would be considered and not its context, thus the destructor of derivedClass will be simply ignored.
+3. As a result, this will cause memory leak.
 
  
