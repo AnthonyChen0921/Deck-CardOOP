@@ -31,3 +31,10 @@ Object::~Object() {
     std::cout << "Address of the object: " << this << std::endl;
     std::cout << "id: " << id << std::endl;
 }
+
+void Object::print(){
+    cout << "Print function called" << endl;
+    cout << "Address of the object: " << this << endl;
+    cout << "id: " << id << endl;
+}
+

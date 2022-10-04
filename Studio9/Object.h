@@ -20,6 +20,9 @@ public:
     Object(const Object &p);
     // declare a destructor
     ~Object();
+    // print() function
+    void print();
+
 
 };
 
