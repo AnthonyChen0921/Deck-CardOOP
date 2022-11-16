@@ -59,25 +59,14 @@ void PinochleGame::deal(){
     while (deck.getSize() >= numCards){
         for (int i = 0; i < static_cast<int>(hands.size()); i++)
         {
-            deck >> hands[i];
-            deck >> hands[i];
-            deck >> hands[i];  
-            // Problem: currently if the deck has 2 cards left, shifting 3 cards will be unsafe, cauing runtime error
-
-            // Solution1: add size() function in the deck class to check the size of the deck
-            //             -- result: the deck will have 2 cards leftover
-            // Accpted
-
-            // Solution2: use try catch block to catch the runtime error and break the loop
-            //             -- result: the deck will have all cards on player's hand but unevenly distributed
-            // Infeasible, rejected
-
-            // Solution3: deal with the number of the card before call deal() function, and make sure the number of the card is divisible by 3
-            //             -- result: the deck will have 2 cards leftover, add helper function, complicated
-            // Feasible, rejected
+            deck >> hands[(i + dealer + 1) % hands.size()];
+            deck >> hands[(i + dealer + 1) % hands.size()];
+            deck >> hands[(i + dealer + 1) % hands.size()];  
         }
     }
 }
+
+
 //define a left shift operator (operator<<) that takes a reference to an ostream and a const reference to a variable of the PinochleMelds enumerated type,which prints out an appropriate string for the name of the label and the points value associated with the label as an unsigned decimal integer (with a space in between them), and then returns a reference to the ostream that was passed to it.
 std::ostream &operator<<(std::ostream &os, const PinochleMelds &pm){
     switch (pm)

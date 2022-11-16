@@ -52,7 +52,7 @@ enum message {
 // Game class specific enum
 enum GameRules{
     minPlayer = 2,
-    maxPlayer = 8,
+    maxPlayer = 11,
     print_format_4 = 4,
     print_format_5 = 5,
 };

@@ -73,10 +73,10 @@ void HoldEmGame::deal() {
         // and then increase the state to the next higher value
         case HoldEmState::preflop:
             for (int i = 0; i < static_cast<int>(players.size()); i++) {
-                deck >> hands[i];
+                deck >> hands[(dealer + i + 1) % players.size()];
             }
             for (int i = 0; i < static_cast<int>(players.size()); i++) {
-                deck >> hands[i];
+                deck >> hands[(dealer + i + 1) % players.size()];
             }
             state = HoldEmState::flop;
             break;

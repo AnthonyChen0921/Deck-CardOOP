@@ -32,6 +32,10 @@ Game::Game(int argc, const char *argv[]){
         players.push_back(argv[i]);
         //cout << "Player " << i << ": " << players[i-1] << endl;
     }
+    // once the number of players in the game has been determined, assign the dealer to the last player
+    dealer = players.size() - 1;
+    // initialize the scores vector to have the same number of elements as the players vector and of value 0
+    scores = vector<unsigned int>(players.size(), 0);
 }
 
 /**

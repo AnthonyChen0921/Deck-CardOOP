@@ -16,6 +16,10 @@ class Game
 protected:
     // vector of players
     std::vector<std::string> players;
+    // declare and define a protected dealer member variable of type size_t, that is initialized to 0
+    size_t dealer = 0;
+    // declare and define a protected scores member variable that is vector of unsigned integers
+    std::vector<unsigned int> scores;
 
 public:
     // constructor
