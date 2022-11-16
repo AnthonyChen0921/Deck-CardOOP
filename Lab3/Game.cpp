@@ -50,5 +50,6 @@ int Game::askEndGame(){
     if (input == "y" || input == "Y" || input == "yes" || input == "Yes"){
         return message::quit_game;
     }
+    dealer = (dealer + 1) % players.size();
     return message::continue_game;
 }

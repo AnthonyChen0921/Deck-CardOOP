@@ -132,7 +132,13 @@ void PinochleGame::printPlayersHand(){
     std::vector<PinochleMelds> melds;
     for (int i = 0; i < static_cast<int>(hands.size()); i++)
     {
-        cout << players[i] << "'s hand: " << endl;
+        // if the player is the dealer, an asterisk (*) is added to the player's name
+        if (i == static_cast<int>(dealer)){
+            cout << players[i] << "*'s hand: " << endl;
+        }
+        else{
+            cout << players[i] << "'s hand: " << endl;
+        }
         hands[i].print(cout, GameRules::print_format_4);
         cout << endl;
         PinochleGame::suit_independent_evaluation(hands[i], melds);
