@@ -23,6 +23,8 @@ PinochleGame::PinochleGame(int argc, const char *argv[]) : Game(argc, argv){
     {
         hands.push_back(CardSet<PinochleRank, Suit>());
     }
+    // initialize the trump suit to be undefined
+    trump_suit = Suit::undefined;
 }
 
 /**
@@ -64,6 +66,14 @@ void PinochleGame::deal(){
             deck >> hands[(i + dealer + 1) % hands.size()];  
         }
     }
+    // get dealer cards pointer
+    CardSet<PinochleRank, Suit> tmp(hands[dealer]);
+    std::vector<Card<PinochleRank, Suit>> CardSet<PinochleRank, Suit>::*ptrToCards=CardSet<PinochleRank, Suit>::getCardsPtr();
+    std::vector< Card<PinochleRank, Suit> > cards = tmp.*ptrToCards;
+
+    // get dealer's last card suit
+    trump_suit = cards.back().suit;
+    cout << "Trump suit is " << trump_suit << endl;
 }
 
 
@@ -140,11 +150,18 @@ void PinochleGame::printPlayersHand(){
             cout << players[i] << "'s hand: " << endl;
         }
         hands[i].print(cout, GameRules::print_format_4);
-        cout << endl;
-        PinochleGame::suit_independent_evaluation(hands[i], melds);
-        for(auto m:melds){
-            cout<<m<<endl;
+        suit_independent_evaluation(hands[i], melds);
+        suit_dependent_evaluation(hands[i], melds, trump_suit);
+        if(melds.size() == 0){
+            cout << "No melds" << endl << endl;
         }
+        else{
+            cout << "Melds: " << endl;
+            for(auto m:melds){
+                cout<<m<<endl;
+            }
+        }
+        cout << endl;
         melds.clear();
     }
 
@@ -178,6 +195,18 @@ int PinochleGame::play(){
         deal();
         // print out the hands of each player and melds
         printPlayersHand();
+        // declaring and intializing the vector of players' bids, and initiate a round of bidding by the players
+        vector<unsigned int> bids(players.size(), 0);
+        vector <unsigned int> scores(players.size()/2, 0);
+        unsigned int contract = 0;
+        if(bid(bids, scores, contract) == message::misdeal){
+            collectCardsFromPlayer();
+            // ask to deal again
+            cout << "Deal Again (Press any key)" << endl;
+            char c;
+            cin >> c;
+            continue;
+        }
         // collect the cards from the players to the deck
         collectCardsFromPlayer();
         // ask the player want to end the game or not
@@ -189,6 +218,106 @@ int PinochleGame::play(){
 
 
 
+int PinochleGame::bid(std::vector<unsigned int> &bids, std::vector<unsigned int> &scores, unsigned int &contract){
+    // Each player should then store the value of their bid at the appropriate position in the bids vector
+    // The first and third players are a team, and the second and fourth players are a team: the bids of the players on the same team should be added together and the team with the highest sum of their bids is awarded the contract for that deal; if both teams have the same combined bid score, however, a misdeal is declared and the cards are re-dealt from the same dealer position, the trump suit is again determined by the last card, and bidding is repeated again
+    // Once a contract has been established, a separate running tally of points for the team that was awarded the contract should be initialized with the sum of the values of all the melds in both of their hands
+    // for each player in turn should compute a value to bid based on the sum of the values of the melds in their hand
+    // and the values of the cards in their hands, starting with the next player after the dealer, use %
+    std::vector<PinochleMelds> melds;
+    std::vector<unsigned int> cardPoints(players.size(), 0);
+    int playerCount = 0;
+    while (playerCount < static_cast<int>(players.size())){
+        // modulous to get the next player
+        int i = (dealer + playerCount + 1) % players.size();
+        // get the melds of the player
+        suit_independent_evaluation(hands[i], melds);
+        suit_dependent_evaluation(hands[i], melds, trump_suit);
+        for(auto m:melds){
+            bids[i] += PinochleGame::points[m];
+        }
+        // get the points of the cards of the player
+        cardPoints[i] = getCardPoints(hands[i]);
+        melds.clear();
+        playerCount++;
+    }
+    // The first and third players are a team, and the second and fourth players are a team: the bids of the players on the same team should be added together and the team with the highest sum of their bids is awarded the contract for that deal; if both teams have the same combined bid score, however, a misdeal is declared and the cards are re-dealt from the same dealer position, the trump suit is again determined by the last card, and bidding is repeated again
+    unsigned int sum1 = bids[0] + bids[2] + cardPoints[0] + cardPoints[2];
+    unsigned int sum2 = bids[1] + bids[3] + cardPoints[1] + cardPoints[3];
+    cout << "sum1: " << sum1 << endl;
+    cout << "sum2: " << sum2 << endl;
+    if (sum1 > sum2){
+        cout << "Team 1 wins the contract" << endl;
+        contract = 1;
+        scores[0] = sum1;
+    }
+    else if (sum1 < sum2){
+        cout << "Team 2 wins the contract" << endl;
+        contract = 2;
+        scores[1] = sum2;
+    }
+    else{
+        cout << "Misdeal" << endl;
+        return message::misdeal;
+    }
+    // print points
+    for (int i = 0; i < static_cast<int>(scores.size()); i++){
+        cout << "Team " << i + 1 << " points: " << scores[i] << endl;
+    }
+    return message::SUCCESS;
+}
+
+/**
+ * @brief getCardPoints() function compute the points of the cards in the hand
+ * 
+ * @param hand 
+ * @return unsigned int 
+ */
+unsigned int PinochleGame::getCardPoints(const CardSet<PinochleRank, Suit> &hand){
+    unsigned int cardPoints = 0;
+    std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> m = convertCardSetToMap(hand);
+    for(auto it = m.begin(); it != m.end(); it++){
+        if(it->first == PinochleRank::ace){
+            cardPoints += 11;
+        }
+        else if(it->first == PinochleRank::ten){
+            cardPoints += 10;
+        }
+        else if(it->first == PinochleRank::king){
+            cardPoints += 4;
+        }
+        else if(it->first == PinochleRank::queen){
+            cardPoints += 3;
+        }
+        else if(it->first == PinochleRank::jack){
+            cardPoints += 2;
+        }
+    }
+    return cardPoints;
+}
+
+
+
+/**
+ * @brief convert the CardSet to a map of rank and suit, sorted by rank and suit
+ * 
+ * @param cs 
+ * @return std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> 
+ */
+std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> PinochleGame::convertCardSetToMap(const CardSet<PinochleRank, Suit> &cs){
+    CardSet<PinochleRank, Suit> tmp(cs);
+    std::vector< Card<PinochleRank, Suit> > CardSet<PinochleRank, Suit>::*ptrToCards=CardSet<PinochleRank, Suit>::getCardsPtr();
+    std::vector< Card<PinochleRank, Suit> > cards = tmp.*ptrToCards;
+    std::sort(cards.begin(),cards.end(),compareRank<PinochleRank, Suit>);
+    std::sort(cards.begin(),cards.end(),compareSuit<PinochleRank, Suit>);
+
+    //maintain a hashmap to check cards
+    std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> m;
+    for(auto c:cards)
+        m[c.rank][c.suit]++;
+    return m;
+} 
+
 
 /**
  * @brief suit_independent_evaluation() function 
@@ -197,16 +326,7 @@ int PinochleGame::play(){
  * @return 
  *              
  */void PinochleGame::suit_independent_evaluation(const CardSet<PinochleRank, Suit> &cs, std::vector<PinochleMelds> &melds){
-    CardSet<PinochleRank, Suit> tmp(cs);
-    std::vector<Card<PinochleRank, Suit>> CardSet<PinochleRank, Suit>::*ptrToCards=CardSet<PinochleRank, Suit>::getCardsPtr();
-    std::vector<Card<PinochleRank, Suit>> cards = tmp.*ptrToCards;
-    std::sort(cards.begin(),cards.end(),compareRank<PinochleRank, Suit>);
-    std::sort(cards.begin(),cards.end(),compareSuit<PinochleRank, Suit>);
-    
-    //maintain a hashmap to check cards
-    std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> m;
-    for(auto c:cards)
-        m[c.rank][c.suit]++;
+    std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> m = convertCardSetToMap(cs);
 
     //check aces
     if(m[PinochleRank::ace][Suit::spades]==static_cast<int>(cardNumber::pair) && m[PinochleRank::ace][Suit::clubs]==static_cast<int>(cardNumber::pair) && m[PinochleRank::ace][Suit::diamonds]==static_cast<int>(cardNumber::pair) && m[PinochleRank::ace][Suit::hearts]==static_cast<int>(cardNumber::pair))
@@ -217,7 +337,7 @@ int PinochleGame::play(){
     //check king
     if(m[PinochleRank::king][Suit::spades]==static_cast<int>(cardNumber::pair) && m[PinochleRank::king][Suit::clubs]==static_cast<int>(cardNumber::pair) && m[PinochleRank::king][Suit::diamonds]==static_cast<int>(cardNumber::pair) && m[PinochleRank::king][Suit::hearts]==static_cast<int>(cardNumber::pair))
         melds.push_back(PinochleMelds::eighthundredkings);
-    else if(m[PinochleRank::king][Suit::spades]==static_cast<int>(cardNumber::single) && m[PinochleRank::king][Suit::clubs]==static_cast<int>(cardNumber::single) && m[PinochleRank::king][Suit::diamonds]==static_cast<int>(cardNumber::single) && m[PinochleRank::king][Suit::hearts]==static_cast<int>(cardNumber::single))
+    else if(m[PinochleRank::king][Suit::spades]==static_cast<int>(cardNumber::single) && m[PinochleRank::king][Suit::clubs]==static_cast<int>(cardNumber::single) &&m[PinochleRank::king][Suit::diamonds]==static_cast<int>(cardNumber::single) && m[PinochleRank::king][Suit::hearts]==static_cast<int>(cardNumber::single))
         melds.push_back(PinochleMelds::eightykings);
     
     //check queen
@@ -251,4 +371,31 @@ int PinochleGame::play(){
                 melds.push_back(PinochleMelds::pinochle);
     }
        
+}
+
+
+
+void PinochleGame::suit_dependent_evaluation(const CardSet<PinochleRank, Suit> &cs, std::vector<PinochleMelds> &melds, Suit s){
+    std::unordered_map<PinochleRank,std::unordered_map<Suit,int> > m = convertCardSetToMap(cs);
+
+    // check for insuitdoublerun
+    if(m[PinochleRank::ace][s]==static_cast<int>(cardNumber::pair) && m[PinochleRank::ten][s]==static_cast<int>(cardNumber::pair) && m[PinochleRank::king][s]==static_cast<int>(cardNumber::pair) && m[PinochleRank::queen][s]==static_cast<int>(cardNumber::pair) && m[PinochleRank::jack][s]==static_cast<int>(cardNumber::pair)){
+        melds.push_back(PinochleMelds::insuitdoublerun);
+    }
+    // check for insuitrun
+    else if(m[PinochleRank::ace][s]==static_cast<int>(cardNumber::single) && m[PinochleRank::ten][s]==static_cast<int>(cardNumber::single) && m[PinochleRank::king][s]==static_cast<int>(cardNumber::single) && m[PinochleRank::queen][s]==static_cast<int>(cardNumber::single) && m[PinochleRank::jack][s]==static_cast<int>(cardNumber::single)){
+        melds.push_back(PinochleMelds::insuitrun);
+    }
+    // check for insuitmarriage
+    else if(m[PinochleRank::king][s]==static_cast<int>(cardNumber::single) && m[PinochleRank::queen][s]==static_cast<int>(cardNumber::single)){
+        melds.push_back(PinochleMelds::insuitmarriage);
+    }
+    // check for offsuitmarriage
+    else if(m[PinochleRank::king][s]==static_cast<int>(cardNumber::single) && m[PinochleRank::queen][s]==static_cast<int>(cardNumber::single)){
+        melds.push_back(PinochleMelds::offsuitmarriage);
+    }
+    // check for dix
+    else if(m[PinochleRank::nine][s]==static_cast<int>(cardNumber::single)){
+        melds.push_back(PinochleMelds::dix);
+    }
 }

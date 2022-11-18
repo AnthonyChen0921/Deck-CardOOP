@@ -49,8 +49,16 @@ public:
     void collectCardsFromPlayer();
     // print out the melds of each player
     void printPlayersMelds();
+    // bid()
+    int bid(std::vector<unsigned int> &bids, std::vector<unsigned int> &scores, unsigned int &contract);
     static std::unordered_map<PinochleMelds,int> points;
 private:  
+    Suit trump_suit;
     void suit_independent_evaluation(const CardSet<PinochleRank, Suit> &cs, std::vector<PinochleMelds> &melds);
+    void suit_dependent_evaluation(const CardSet<PinochleRank, Suit> &cs, std::vector<PinochleMelds> &melds, Suit s);
+    unsigned int getCardPoints(const CardSet<PinochleRank, Suit> &hand);
+
+    // helper function
+    std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> convertCardSetToMap(const CardSet<PinochleRank, Suit> &cs);
 };
 

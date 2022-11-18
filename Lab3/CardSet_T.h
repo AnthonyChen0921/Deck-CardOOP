@@ -35,6 +35,7 @@ public:
     bool is_empty();
     // getSize function
     size_t getSize();
+    // getL
     // add card function
     void addCard(Card<R, S> c);
     static std::vector< Card<R, S> > CardSet::*getCardsPtr()  { return &CardSet::cards; }
