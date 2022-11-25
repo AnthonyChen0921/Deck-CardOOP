@@ -123,3 +123,22 @@ void CardSet<R, S>::addCard(Card<R, S> c)
 {
     cards.push_back(c);
 }
+
+/**
+ * @brief add operator takes nonconst reference of CardSet and return reference of CardSet
+ * 
+ * @tparam R Rank type
+ * @tparam S Suit type
+ * @param cs CardSet object
+ * @return CardSet<R, S>& 
+ */
+template <typename R, typename S>
+CardSet<R, S> &CardSet<R, S>::operator+(CardSet<R, S> &cs)
+{
+    // iterate through cards vector
+    for (auto it = cs.cards.begin(); it != cs.cards.end(); ++it){
+        // insert a card into cards vector
+        CardSet<R,S>::cards.push_back(*it);
+    }
+    return *this;
+}

@@ -199,6 +199,7 @@ int PinochleGame::play(){
         vector<unsigned int> bids(players.size(), 0);
         vector <unsigned int> scores(players.size()/2, 0);
         unsigned int contract = 0;
+        vector <unsigned int> contractPoint(players.size()/2, 0);
         if(bid(bids, scores, contract) == message::misdeal){
             collectCardsFromPlayer();
             // ask to deal again
@@ -206,6 +207,7 @@ int PinochleGame::play(){
             char c;
             cin >> c;
             continue;
+        } else{
         }
         // collect the cards from the players to the deck
         collectCardsFromPlayer();
@@ -244,17 +246,17 @@ int PinochleGame::bid(std::vector<unsigned int> &bids, std::vector<unsigned int>
     // The first and third players are a team, and the second and fourth players are a team: the bids of the players on the same team should be added together and the team with the highest sum of their bids is awarded the contract for that deal; if both teams have the same combined bid score, however, a misdeal is declared and the cards are re-dealt from the same dealer position, the trump suit is again determined by the last card, and bidding is repeated again
     unsigned int sum1 = bids[0] + bids[2] + cardPoints[0] + cardPoints[2];
     unsigned int sum2 = bids[1] + bids[3] + cardPoints[1] + cardPoints[3];
-    cout << "sum1: " << sum1 << endl;
-    cout << "sum2: " << sum2 << endl;
+    cout << "sum1:" << sum1 << " bids1:" << bids[0] + bids[2] << " cardPoints1:" << cardPoints[0] + cardPoints[2] << endl;
+    cout << "sum2:" << sum2 << " bids2:" << bids[1] + bids[3] << " cardPoints2:" << cardPoints[1] + cardPoints[3] << endl;
     if (sum1 > sum2){
         cout << "Team 1 wins the contract" << endl;
         contract = 1;
-        scores[0] = sum1;
+        scores[0] = bids[0] + bids[2];
     }
     else if (sum1 < sum2){
         cout << "Team 2 wins the contract" << endl;
         contract = 2;
-        scores[1] = sum2;
+        scores[1] = bids[1] + bids[3];
     }
     else{
         cout << "Misdeal" << endl;

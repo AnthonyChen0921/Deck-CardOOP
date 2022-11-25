@@ -216,8 +216,7 @@ int HoldEmGame::play() {
         
         deal();
         printBoard("River: ");
-
-        // collect cards
+ 
         collectCardsFromPlayer();
         collectCardsFromBoard();
 
@@ -279,7 +278,7 @@ HoldEmHandRank HoldEmGame::holdem_hand_evaluation(const CardSet<HoldEmRank, Suit
             return HoldEmHandRank::pair;
     }    
         
-        return HoldEmHandRank::xhigh;
+    return HoldEmHandRank::xhigh;
 }
 
 HoldEmGame::HoldEmPlayer::HoldEmPlayer(std::string n, CardSet<HoldEmRank, Suit> h, HoldEmHandRank r) : name(n), hand(h), rank(r) {}

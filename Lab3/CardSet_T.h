@@ -31,6 +31,8 @@ public:
     void print(std::ostream &os, size_t lb);
     // right shift operator
     CardSet<R, S> &operator>>(CardSet<R, S> &cs);
+    // add operator
+    CardSet<R, S> &operator+(CardSet<R, S> &cs);
     // is_empty function
     bool is_empty();
     // getSize function
