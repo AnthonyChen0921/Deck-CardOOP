@@ -4,13 +4,13 @@ EXECUTABLE	= studio15
 #		Source (.cpp) files you want to compile
 #		(NOTE: Don't include header (.h) files, or any source (.cpp) files
 #		that only contain template class method definitions.)
-CMPL_SRCS	= Studio15.cpp Foo.cpp
+CMPL_SRCS	= Studio15.cpp Foo2.cpp
 
 #               Source files containing only template class method definitions
 TMPL_SRCS	=  template.h
 
 #               Header (.h) files
-HEADER_FILES    = Foo.h
+HEADER_FILES    = Foo2.h
 
 #               Any special flags that should be set for compilation
 SPECIAL_FLAGS  = -std=c++17 -DTEMPLATE_HEADERS_INCLUDE_SOURCE
