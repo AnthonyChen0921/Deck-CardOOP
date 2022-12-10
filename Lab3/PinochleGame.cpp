@@ -196,19 +196,23 @@ int PinochleGame::play(){
         // print out the hands of each player and melds
         printPlayersHand();
         // declaring and intializing the vector of players' bids, and initiate a round of bidding by the players
-        vector<unsigned int> bids(players.size(), 0);
-        vector <unsigned int> scores(players.size()/2, 0);
         unsigned int contract = 0;
-        vector <unsigned int> contractPoint(players.size()/2, 0);
+        vector<unsigned int> bids(players.size(), 0); // bids of each player
+        vector <unsigned int> scores(players.size()/2, 0); // tally the scores of each team to see if team meets the contract
+
+        // bid round
         if(bid(bids, scores, contract) == message::misdeal){
             collectCardsFromPlayer();
             // ask to deal again
-            cout << "Deal Again (Press any key)" << endl;
+            cout << "Same bid score! Deal Again (Press any key)" << endl;
             char c;
             cin >> c;
             continue;
-        } else{
-        }
+        } 
+
+        // play tricks round
+        playTricks(bids, scores, contract);
+        
         // collect the cards from the players to the deck
         collectCardsFromPlayer();
         // ask the player want to end the game or not
@@ -218,7 +222,94 @@ int PinochleGame::play(){
     }
 }
 
+void PinochleGame::playTricks(std::vector<unsigned int> &bids, std::vector<unsigned int> &scores, unsigned int &contract){
+    // repeatedly have each player in turn, initially starting with the player on the team that was awarded the contract whose bid was higher (or if the team members' bids were the same, is the earlier of them in the list of players that was passed to the program), move a card from their hand into an (initially empty) CardSet for that "trick" in the game:
+    // the player who moves the first card into the trick is the "leader" of that trick
+    int first_player = 0;
+    // initialize a vector of CardSet to store the cards of each trick
+    CardSet<PinochleRank, Suit> trick;
+    // find the first player with the greatest bid in bids in which winning the contract
+    if(contract == 1){
+        if(bids[0] >= bids[2]){
+            first_player = 0;
+        }
+        first_player = 2;
+    } else if(contract == 2){
+        if(bids[1] >= bids[3]){
+            first_player = 1;
+        }
+        first_player = 3;
+    }
 
+    // print first player
+    cout << players[first_player] << " has the highest bid and is the first player to play" << endl;
+
+    // repeatedly have each player in turn, move a card from their hand to the trick, untill all cards are played
+    int turn = 0;
+    while (turn < 12){
+        cout << "Turn " << turn << " starts:" << endl;
+        int player_count = 0;
+        while (player_count < 4){
+            int i = (first_player + player_count) % 4;
+            cout << players[i] << " plays:" << endl;
+            std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map = convertCardSetToMap(hands[i]);
+            // print out the map
+            for(auto m:map){
+                cout << m.first << ": ";
+                for(auto n:m.second){
+                    cout << n.first << " " << n.second << " ";
+                }
+                cout << endl;
+            }
+
+            // find the highest card in the hand and play it to the trick
+            PinochleRank highest_rank = findHighestRank(map);
+            cout << "highest rank: " << highest_rank << endl;
+            // find the suit of the highest card
+            Suit highest_suit = findHighestSuit(map, highest_rank);
+            cout << "highest suit: " << highest_suit << endl;
+            // move the card from the hand to the trick
+            map[highest_rank][highest_suit]--;
+            hands[i].removeCard(highest_rank, highest_suit);
+            
+            // move a card from their hand to the trick
+            // hands[i] >> trick;
+            // print out the trick
+            // trick.print(cout, 20);
+            // next turn
+            player_count++;
+
+        }
+        // next trick
+        turn++;
+    }
+
+    
+
+
+}
+
+PinochleRank PinochleGame::findHighestRank(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map){
+    // find the highest card in the hand and play it to the trick
+    PinochleRank highest_rank = PinochleRank::nine;
+    for(auto m:map){
+        if(m.first > highest_rank){
+            highest_rank = m.first;
+        }
+    }
+    return highest_rank;
+}
+
+Suit PinochleGame::findHighestSuit(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> &map, PinochleRank &highest_rank){
+    // find the suit of the highest card
+    Suit highest_suit = Suit::clubs;
+    for(auto m:map[highest_rank]){
+        if(m.first > highest_suit){
+            highest_suit = m.first;
+        }
+    }
+    return highest_suit;
+}
 
 int PinochleGame::bid(std::vector<unsigned int> &bids, std::vector<unsigned int> &scores, unsigned int &contract){
     // Each player should then store the value of their bid at the appropriate position in the bids vector
@@ -246,15 +337,15 @@ int PinochleGame::bid(std::vector<unsigned int> &bids, std::vector<unsigned int>
     // The first and third players are a team, and the second and fourth players are a team: the bids of the players on the same team should be added together and the team with the highest sum of their bids is awarded the contract for that deal; if both teams have the same combined bid score, however, a misdeal is declared and the cards are re-dealt from the same dealer position, the trump suit is again determined by the last card, and bidding is repeated again
     unsigned int sum1 = bids[0] + bids[2] + cardPoints[0] + cardPoints[2];
     unsigned int sum2 = bids[1] + bids[3] + cardPoints[1] + cardPoints[3];
-    cout << "sum1:" << sum1 << " bids1:" << bids[0] + bids[2] << " cardPoints1:" << cardPoints[0] + cardPoints[2] << endl;
-    cout << "sum2:" << sum2 << " bids2:" << bids[1] + bids[3] << " cardPoints2:" << cardPoints[1] + cardPoints[3] << endl;
+    cout << "Team1:" << sum1 << " = bids1:" << bids[0] + bids[2] << " + cardPoints1:" << cardPoints[0] + cardPoints[2] << endl;
+    cout << "Team2:" << sum2 << " = bids2:" << bids[1] + bids[3] << " + cardPoints2:" << cardPoints[1] + cardPoints[3] << endl;
     if (sum1 > sum2){
-        cout << "Team 1 wins the contract" << endl;
+        cout << "Team 1 wins the contract" << endl << endl;
         contract = 1;
         scores[0] = bids[0] + bids[2];
     }
     else if (sum1 < sum2){
-        cout << "Team 2 wins the contract" << endl;
+        cout << "Team 2 wins the contract" << endl << endl;
         contract = 2;
         scores[1] = bids[1] + bids[3];
     }

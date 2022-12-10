@@ -41,3 +41,16 @@ bool compareSuit(const Card<R, S> &lhs, const Card<R, S> &rhs){
         return false;
     }
 }
+
+// declare template operator== for Card
+/**
+ * @brief operator==
+ * @param lhs
+ * @param rhs
+ * @return bool
+ */
+template <typename R, typename S>
+bool operator==(const Card<R, S> &lhs, const Card<R, S> &rhs)
+{
+    return lhs.rank == rhs.rank && lhs.suit == rhs.suit;
+}

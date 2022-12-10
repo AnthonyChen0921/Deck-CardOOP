@@ -29,6 +29,8 @@ public:
     ~CardSet() {}
     // print function
     void print(std::ostream &os, size_t lb);
+    // remove card function
+    void removeCard(R r, S s);
     // right shift operator
     CardSet<R, S> &operator>>(CardSet<R, S> &cs);
     // add operator

@@ -51,6 +51,8 @@ public:
     void printPlayersMelds();
     // bid()
     int bid(std::vector<unsigned int> &bids, std::vector<unsigned int> &scores, unsigned int &contract);
+    // playTricks()
+    void playTricks(std::vector<unsigned int> &bids, std::vector<unsigned int> &scores, unsigned int &contract);
     static std::unordered_map<PinochleMelds,int> points;
 private:  
     Suit trump_suit;
@@ -60,5 +62,7 @@ private:
 
     // helper function
     std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> convertCardSetToMap(const CardSet<PinochleRank, Suit> &cs);
+    PinochleRank findHighestRank(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map);
+    Suit findHighestSuit(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> &map, PinochleRank &highest_rank);
 };
 

@@ -28,6 +28,9 @@ struct Card
 // declare template operator<< for Card
 template <typename R, typename S>
 std::ostream &operator<<(std::ostream &os, const Card<R, S> &card);
+// declare template operator== for Card
+template <typename R, typename S>
+bool operator==(const Card<R, S> &lhs, const Card<R, S> &rhs);
 
 //add two non-member function compare rank and compare suit
 template <typename R, typename S>

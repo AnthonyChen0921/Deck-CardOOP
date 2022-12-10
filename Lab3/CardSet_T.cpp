@@ -142,3 +142,20 @@ CardSet<R, S> &CardSet<R, S>::operator+(CardSet<R, S> &cs)
     }
     return *this;
 }
+
+
+// define remove function
+template <typename R, typename S>
+void CardSet<R, S>::removeCard(R r, S s)
+{
+    // create a card
+    Card<R, S> c(r, s);
+    // iterate through cards vector
+    for (auto it = cards.begin(); it != cards.end(); ++it){
+        // if the card is found, erase it
+        if (*it == c){
+            cards.erase(it);
+            break;
+        }
+    }
+}
