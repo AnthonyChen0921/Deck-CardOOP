@@ -80,6 +80,8 @@ CardSet<R, S> &CardSet<R, S>::operator>>(CardSet<R, S> &cardset)
 
 
 
+
+
 /**
  * @brief check if the cardset is empty
  * 
@@ -158,4 +160,16 @@ void CardSet<R, S>::removeCard(R r, S s)
             break;
         }
     }
+}
+
+
+// define index operator
+template <typename R, typename S>
+Card<R, S> &CardSet<R, S>::operator[](size_t index)
+{
+    // if index is out of range, throw runtime_error
+    if (index >= cards.size()){
+        throw std::runtime_error("Index out of range");
+    }
+    return cards[index];
 }

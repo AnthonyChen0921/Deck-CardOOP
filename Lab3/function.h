@@ -63,6 +63,7 @@ enum PinochleGameGameRules{
     num_of_players = 4,
     packet_of_cards = 3,
     numPlayerPinochle = 6,
+    num_of_turns = 12,
 };
 
 // HoldEm class specific enum

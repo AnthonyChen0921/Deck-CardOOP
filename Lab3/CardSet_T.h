@@ -35,6 +35,8 @@ public:
     CardSet<R, S> &operator>>(CardSet<R, S> &cs);
     // add operator
     CardSet<R, S> &operator+(CardSet<R, S> &cs);
+    // add index operator
+    Card<R, S> &operator[](size_t index);
     // is_empty function
     bool is_empty();
     // getSize function

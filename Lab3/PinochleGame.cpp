@@ -225,69 +225,198 @@ int PinochleGame::play(){
 void PinochleGame::playTricks(std::vector<unsigned int> &bids, std::vector<unsigned int> &scores, unsigned int &contract){
     // repeatedly have each player in turn, initially starting with the player on the team that was awarded the contract whose bid was higher (or if the team members' bids were the same, is the earlier of them in the list of players that was passed to the program), move a card from their hand into an (initially empty) CardSet for that "trick" in the game:
     // the player who moves the first card into the trick is the "leader" of that trick
-    int first_player = 0;
+    int first_player = findFirstPlayer(bids, contract);
     // initialize a vector of CardSet to store the cards of each trick
     CardSet<PinochleRank, Suit> trick;
-    // find the first player with the greatest bid in bids in which winning the contract
-    if(contract == 1){
-        if(bids[0] >= bids[2]){
-            first_player = 0;
-        }
-        first_player = 2;
-    } else if(contract == 2){
-        if(bids[1] >= bids[3]){
-            first_player = 1;
-        }
-        first_player = 3;
-    }
-
-    // print first player
+    // declare first player
     cout << players[first_player] << " has the highest bid and is the first player to play" << endl;
-
     // repeatedly have each player in turn, move a card from their hand to the trick, untill all cards are played
     int turn = 0;
-    while (turn < 12){
-        cout << "Turn " << turn << " starts:" << endl;
+    while (turn < PinochleGameGameRules::num_of_turns){
+        cout << "Turn " << turn+1 << " starts:" << endl;
+        cout << players[first_player] << " is the first player to play this round" << endl;
         int player_count = 0;
-        while (player_count < 4){
-            int i = (first_player + player_count) % 4;
-            cout << players[i] << " plays:" << endl;
+        CardSet<PinochleRank, Suit> trick_thisRound;
+        while (player_count < PinochleGameGameRules::num_of_players){
+            int i = (first_player + player_count) % PinochleGameGameRules::num_of_players;
+            // Get the hand of the current player
             std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map = convertCardSetToMap(hands[i]);
-            // print out the map
-            for(auto m:map){
-                cout << m.first << ": ";
-                for(auto n:m.second){
-                    cout << n.first << " " << n.second << " ";
+            Suit trick_suit = Suit::undefined;
+            PinochleRank trick_rank = PinochleRank::undefined;
+            // printMap(map);
+            if(i == first_player){
+                // find the highest card in the hand and play it to the trick
+                PinochleRank highest_rank = findHighestRank(map);
+                // find the suit of the highest card
+                Suit highest_suit = findHighestSuit(map, highest_rank);
+                // if there is a card of the trump suit of that highest rank that card should be played; otherwise the card of that highest rank that is of the highest non-trump suit should be played
+                if (map[highest_rank].find(trump_suit) != map[highest_rank].end()){
+                    highest_suit = trump_suit;
                 }
-                cout << endl;
+                // move the card from the hand to the trick
+                cout << players[i] << " plays " << Card<PinochleRank, Suit>(highest_rank, highest_suit) << endl;
+                trick_suit = highest_suit;
+                trick_rank = highest_rank;
+                map[highest_rank][highest_suit]--;
+                hands[i].removeCard(highest_rank, highest_suit);
+                trick_thisRound.addCard(Card<PinochleRank, Suit>(highest_rank, highest_suit));
             }
+            // Every player after that must follow suit, by playing a card of the same suit that was led, if they can:
+            // 1. If a card of the trump suit was led, if the player has a trump card that is higher in rank than any other card of the trump suit that has been played so far in that trick, the player's highest card in the trump suit should be played; otherwise the player should play their lowest ranked card of the trump suit if they have one, and if not should play their lowest ranked card of any non-trump suit
+            // 2. If a non-trump suit was led, and the player has a card of that suit, then if no trump cards have been played so far in that trick, and they have a higher card in the suit that was led than any other card of that suit so far in the trick, they should play the highest card they have in the suit that was led
+            // 3. If a non-trump suit was led, and the player has a card of that suit, but a trump card or a higher card than they have in the suit that was led has been played so far in that trick, they should play their lowest ranked card of the suit that was led
+            // 4. If a player does not have a card of the non-trump suit that was led, then if they have a trump card that is higher in rank than any other trump card that has been played, they should play their highest ranked trump card; otherwise they should play the lowest ranked card of any non-trump suit
+            else if (i != first_player){
+                Suit first_suit = trick_suit;
+                PinochleRank first_rank = trick_rank;
 
+                PinochleRank highest_rank = findHighestRank(map);
+                Suit highest_suit = findHighestSuit(map, highest_rank);
+                // if there is a card of the trump suit of that highest rank that card should be played; otherwise the card of that highest rank that is of the highest non-trump suit should be played
+                if (map[highest_rank].find(trump_suit) != map[highest_rank].end()){
+                    highest_suit = trump_suit;
+                }
+                // if the first card is a trump card
+                if (first_suit == trump_suit){
+                    // if the player has a trump card that is higher in rank than any other card of the trump suit that has been played so far in that trick, the player's highest card in the trump suit should be played
+                    if (map[highest_rank].find(trump_suit) != map[highest_rank].end() && highest_rank > first_rank){
+                        cout << players[i] << " plays " << Card<PinochleRank, Suit>(highest_rank, highest_suit) << endl;
+                        map[highest_rank][highest_suit]--;
+                        hands[i].removeCard(highest_rank, highest_suit);
+                        trick_thisRound.addCard(Card<PinochleRank, Suit>(highest_rank, highest_suit));
+                    }
+                    // otherwise the player should play their lowest ranked card of the trump suit if they have one, and if not should play their lowest ranked card of any non-trump suit
+                    else{
+                        // find the lowest card in the hand and play it to the trick
+                        PinochleRank lowest_rank = findLowestRank(map);
+                        // find the suit of the lowest card
+                        Suit lowest_suit = findLowestSuit(map, lowest_rank);
+                        // if there is a card of the trump suit of that lowest rank that card should be played; otherwise the card of that lowest rank that is of the lowest non-trump suit should be
+                        if (map[lowest_rank].find(trump_suit) != map[lowest_rank].end()){
+                            lowest_suit = trump_suit;
+                        }
+                        cout << players[i] << " plays " << Card<PinochleRank, Suit>(lowest_rank, lowest_suit) << endl;
+                        map[lowest_rank][lowest_suit]--;
+                        hands[i].removeCard(lowest_rank, lowest_suit);
+                        trick_thisRound.addCard(Card<PinochleRank, Suit>(lowest_rank, lowest_suit));
+                    }
+                }
+                // if the first card is not a trump card
+                else if (first_suit != trump_suit){
+                    // if the player has a card of that suit, then if no trump cards have been played so far in that trick, and they have a higher card in the suit that was led than any other card of that suit so far in the trick, they should play the highest card they have in the suit that was led
+                    if (map[highest_rank].find(first_suit) != map[highest_rank].end() && highest_rank > first_rank){
+                        cout << players[i] << " plays " << Card<PinochleRank, Suit>(highest_rank, highest_suit) << endl;
+                        map[highest_rank][highest_suit]--;
+                        hands[i].removeCard(highest_rank, highest_suit);
+                        trick_thisRound.addCard(Card<PinochleRank, Suit>(highest_rank, highest_suit));
+                    }
+                    // if the player has a card of that suit, but a trump card or a higher card than they have in the suit that was led has been played so far in that trick, they should play their lowest ranked card of the suit that was led
+                    else if (map[highest_rank].find(first_suit) != map[highest_rank].end() && highest_rank <= first_rank){
+                        // find the lowest card in the hand and play it to the trick
+                        PinochleRank lowest_rank = findLowestRank(map);
+                        // find the suit of the lowest card
+                        Suit lowest_suit = findLowestSuit(map, lowest_rank);
+                        // if there is a card of the trump suit of that lowest rank that card should be played; otherwise the card of that lowest rank that is of the lowest non-trump suit should be
+                        if (map[lowest_rank].find(first_suit) != map[lowest_rank].end()){
+                            lowest_suit = first_suit;
+                        }
+                        cout << players[i] << " plays " << Card<PinochleRank, Suit>(lowest_rank, lowest_suit) << endl;
+                        map[lowest_rank][lowest_suit]--;
+                        hands[i].removeCard(lowest_rank, lowest_suit);
+                        trick_thisRound.addCard(Card<PinochleRank, Suit>(lowest_rank, lowest_suit));
+                    }
+                    // if a player does not have a card of the non-trump suit that was led,
+                    else if (map[highest_rank].find(first_suit) == map[highest_rank].end()){
+                        // if the player has a trump card, they should play their highest ranked trump card
+                        if (map[highest_rank].find(trump_suit) != map[highest_rank].end()){
+                            cout << players[i] << " plays " << Card<PinochleRank, Suit>(highest_rank, highest_suit) << endl;
+                            map[highest_rank][highest_suit]--;
+                            hands[i].removeCard(highest_rank, highest_suit);
+                            trick_thisRound.addCard(Card<PinochleRank, Suit>(highest_rank, highest_suit));
+                        }
+                        // otherwise they should play their lowest ranked card of any non-trump suit
+                        else{
+                            // find the lowest card in the hand and play it to the trick
+                            PinochleRank lowest_rank = findLowestRank(map);
+                            // find the suit of the lowest card
+                            Suit lowest_suit = findLowestSuit(map, lowest_rank);
+                            // if there is a card of the trump suit of that lowest rank that card should be played; otherwise the card of that lowest rank that is of the lowest non-trump suit should be
+                            if (map[lowest_rank].find(first_suit) != map[lowest_rank].end()){
+                                lowest_suit = first_suit;
+                            }
+                            cout << players[i] << " plays " << Card<PinochleRank, Suit>(lowest_rank, lowest_suit) << endl;
+                            map[lowest_rank][lowest_suit]--;
+                            hands[i].removeCard(lowest_rank, lowest_suit);
+                            trick_thisRound.addCard(Card<PinochleRank, Suit>(lowest_rank, lowest_suit));
+                        }
+                    }
+                }
+            }
+            player_count++;
+        }
+        
+        // print out the trick
+        trick_thisRound.print(cout, print_format_4);
+
+        // extract the cards in the trick_thisRound into a vector
+        vector<Card<PinochleRank, Suit>> trick_cards_vector;
+        for (int i = 0; i < static_cast<int>(trick_thisRound.getSize()); i++){
+            trick_cards_vector.push_back(trick_thisRound[i]);
+        }
+
+        bool trump_played = false;
+        // check if trump was played
+        for (int i = 0; i < static_cast<int>(trick_cards_vector.size()); i++){
+            if (trick_cards_vector[i].suit == trump_suit){
+                trump_played = true;
+            }
+        }
+        // determine the winner of the trick this round
+        // If trump was played, the player who first played the highest-ranked card of the trump suit wins the trick; otherwise if trump was not played, the player who first played the highest-ranked card of the suit that was led wins the trick -- if a trick has two cards of the same highest rank (e.g., both tens) of the trump suit, or of the suit that was led if no trump was played, the player who played the first of those cards wins the trick.
+        if (trump_played){
+            std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map = convertCardSetToMap(trick_thisRound);
             // find the highest card in the hand and play it to the trick
             PinochleRank highest_rank = findHighestRank(map);
-            cout << "highest rank: " << highest_rank << endl;
+
+            // find the player who played the highest card
+            for (int i = 0; i < static_cast<int>(trick_cards_vector.size()); i++){
+                if (trick_cards_vector[i].rank == highest_rank && trick_cards_vector[i].suit == trump_suit){
+                    first_player = i;
+                    cout << players[i] << " wins the trick in round " << turn+1 << endl << endl;
+                    break;
+                }
+            }
+        } 
+        // if trump was not played
+        else{
+            std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map = convertCardSetToMap(trick_thisRound);
+            // find the highest card in the hand and play it to the trick
+            PinochleRank highest_rank = findHighestRank(map);
             // find the suit of the highest card
             Suit highest_suit = findHighestSuit(map, highest_rank);
-            cout << "highest suit: " << highest_suit << endl;
-            // move the card from the hand to the trick
-            map[highest_rank][highest_suit]--;
-            hands[i].removeCard(highest_rank, highest_suit);
-            
-            // move a card from their hand to the trick
-            // hands[i] >> trick;
-            // print out the trick
-            // trick.print(cout, 20);
-            // next turn
-            player_count++;
-
+            // find the player who played the highest card
+            for (int i = 0; i < static_cast<int>(trick_cards_vector.size()); i++){
+                if (trick_cards_vector[i].rank == highest_rank && trick_cards_vector[i].suit == highest_suit){
+                    first_player = i;
+                    cout << players[i] << " wins the trick in this round" << endl;
+                    break;
+                }
+            }
         }
-        // next trick
+
+
+        // push trick_thisRound to trick
+        for (int i = 0; i < static_cast<int>(trick_thisRound.getSize()); i++){
+            trick_thisRound >> trick;
+        }
+
         turn++;
     }
-
-    
-
-
+    // collect the cards from the trick
+    deck.collect(trick);
 }
+
+
 
 PinochleRank PinochleGame::findHighestRank(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map){
     // find the highest card in the hand and play it to the trick
@@ -309,6 +438,28 @@ Suit PinochleGame::findHighestSuit(std::unordered_map<PinochleRank,std::unordere
         }
     }
     return highest_suit;
+}
+
+PinochleRank PinochleGame::findLowestRank(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map){
+    // find the lowest card in the hand and play it to the trick
+    PinochleRank lowest_rank = PinochleRank::ace;
+    for(auto m:map){
+        if(m.first < lowest_rank){
+            lowest_rank = m.first;
+        }
+    }
+    return lowest_rank;
+}
+
+Suit PinochleGame::findLowestSuit(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> &map, PinochleRank &lowest_rank){
+    // find the suit of the lowest card
+    Suit lowest_suit = Suit::spades;
+    for(auto m:map[lowest_rank]){
+        if(m.first < lowest_suit){
+            lowest_suit = m.first;
+        }
+    }
+    return lowest_suit;
 }
 
 int PinochleGame::bid(std::vector<unsigned int> &bids, std::vector<unsigned int> &scores, unsigned int &contract){
@@ -491,4 +642,30 @@ void PinochleGame::suit_dependent_evaluation(const CardSet<PinochleRank, Suit> &
     else if(m[PinochleRank::nine][s]==static_cast<int>(cardNumber::single)){
         melds.push_back(PinochleMelds::dix);
     }
+}
+
+void printMap(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map){
+    for(auto m:map){
+        cout << m.first << ": ";
+        for(auto n:m.second){
+            cout << n.first << " " << n.second << " ";
+        }
+        cout << endl;
+    }
+}
+
+int PinochleGame::findFirstPlayer(std::vector<unsigned int> &bids, unsigned int &contract){
+    // find the first player with the greatest bid in bids in which winning the contract
+    if(contract == 1){
+        if(bids[0] >= bids[2]){
+            return 0;
+        }
+        return 2;
+    } else if(contract == 2){
+        if(bids[1] >= bids[3]){
+            return 1;
+        }
+        return 3;
+    }
+    return 0;
 }

@@ -64,5 +64,10 @@ private:
     std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> convertCardSetToMap(const CardSet<PinochleRank, Suit> &cs);
     PinochleRank findHighestRank(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map);
     Suit findHighestSuit(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> &map, PinochleRank &highest_rank);
+    PinochleRank findLowestRank(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map);
+    Suit findLowestSuit(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> &map, PinochleRank &lowest_rank);
+
+    // more helper functions
+    int findFirstPlayer(std::vector<unsigned int> &bids, unsigned int &contract);
 };
 
