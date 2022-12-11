@@ -111,3 +111,51 @@ Added a operator== in Card_T template class for iterator in remove function to c
 
 
 Test Case and Results:
+
+==================== Test Case 1 ====================
+Rare Case: Misdeal
+
+Lab3 % ./lab3 Pinochle 1 2 3 4 
+====================================================
+=                 PinochleGame                     =
+====================================================
+Dealing cards...
+Trump suit is ♦
+1's hand: 
+A♣ Q♠ K♣ 10♦ 
+10♦ J♥ 10♣ 10♥ 
+9♦ 9♥ Q♦ A♠ 
+
+Melds: 
+dix :10points
+
+
+2's hand: 
+J♥ K♦ 9♣ K♦ 
+9♠ Q♠ J♠ 9♣ 
+K♥ 9♠ A♥ J♣ 
+
+No melds
+
+
+3's hand: 
+Q♣ K♥ A♦ A♣ 
+A♦ J♣ J♦ Q♥ 
+A♥ K♠ Q♥ J♠ 
+
+No melds
+
+
+4*'s hand: 
+10♥ 10♣ 10♠ 9♥ 
+10♠ K♣ Q♣ K♠ 
+J♦ A♠ Q♦ 9♦ 
+
+Melds: 
+dix :10points
+
+
+Team1:60 = bids1:10 + cardPoints1:50
+Team2:60 = bids2:10 + cardPoints2:50
+Misdeal
+Same bid score! Deal Again (Press any key)
