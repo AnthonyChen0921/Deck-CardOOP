@@ -16,7 +16,7 @@ How to run
     - Open up Commandline prompt, and type in
     - "module add gcc-8.3.0"
     - "make"
-    - "./lab3 Pinochle player1 player2 player3 player4" (correct input exmaple)
+    - "./lab3 Pinochle PlayerA PlayerB PlayerC PlayerD" (correct input exmaple)
     - "./lab3 HoldEm player1 player2 player3 player4 player5 player6" (correct input exmaple)
     - "./lab3 randomGame (incorrect input exmaple)
 
@@ -24,7 +24,10 @@ How to run
 
 Errors and Warning jornals:
 
-    1. 
+    1. Pinochle Game bug fixed: 
+        ======== determine the winner of the trick this round ========
+        the index i should be used to access the vector of cards trick_cards_vector[i], not the index j.
+        the index j should be used to access vector of players[j], not the index i.
     
 
 Class Design:
@@ -99,63 +102,250 @@ Class Design:
 
 
 ​                                                            
-
+A comment for Pinochle:
+    Neither of us had played Pinochle before, so we are somewhat confused about the speicific rules of the game (such as what should be played, what cannot be played in trick round). The rules from internet are also different from each other. So we try to follow the lab 3 instruction as much as possible. 
+    
+    There're bugs for play trick part of the PinochleGame. We are sorry for the difference between our game and the real game due to our side of the problems. But aside from that, everything else should be working fine.
 
 
 Design variation:
 
 PinochleGame:
-Added a remove(R r, S s) in CardSet_T template class.
-Added a operator== in Card_T template class for iterator in remove function to compare.
+    BaseClass modification:
+    - Added a removeCard(R r, S s) in CardSet_T template class.
+    - Added a operator== in Card_T template class for iterator in remove function to compare.
+    - Added a operator[] in CardSet_T template class for random accessing vector card.
 
+    PinochleGame modification:
+    - Added helper function findHighestRank/findLowestRank to find the highest/lowest rank in a cardset.
+    - Added helper function findHighestRankwSuit/findLowestRankwSuit to find the highest/lowest rank according to given suit in a cardset.
+    - Added PlayThisCard, calculateScore, findFirstPlayer, checkTrumpPlayed functions to maintain a good modularity.
+    - Added bug fix function such as PrintMap, not used in final evaluation.
 
 
 Test Case and Results:
 
-==================== Test Case 1 ====================
-Rare Case: Misdeal
+1. Pinochle Game, Misdeal
 
-Lab3 % ./lab3 Pinochle 1 2 3 4 
-====================================================
-=                 PinochleGame                     =
-====================================================
-Dealing cards...
-Trump suit is ♦
-1's hand: 
-A♣ Q♠ K♣ 10♦ 
-10♦ J♥ 10♣ 10♥ 
-9♦ 9♥ Q♦ A♠ 
+    ==================== Test Case 1 ====================
+    Rare Case: Misdeal
 
-Melds: 
-dix :10points
+    Lab3 % ./lab3 Pinochle 1 2 3 4 
+    ====================================================
+    =                 PinochleGame                     =
+    ====================================================
+    Dealing cards...
+    Trump suit is ♦
+    1's hand: 
+    A♣ Q♠ K♣ 10♦ 
+    10♦ J♥ 10♣ 10♥ 
+    9♦ 9♥ Q♦ A♠ 
 
-
-2's hand: 
-J♥ K♦ 9♣ K♦ 
-9♠ Q♠ J♠ 9♣ 
-K♥ 9♠ A♥ J♣ 
-
-No melds
+    Melds: 
+    dix :10points
 
 
-3's hand: 
-Q♣ K♥ A♦ A♣ 
-A♦ J♣ J♦ Q♥ 
-A♥ K♠ Q♥ J♠ 
+    2's hand: 
+    J♥ K♦ 9♣ K♦ 
+    9♠ Q♠ J♠ 9♣ 
+    K♥ 9♠ A♥ J♣ 
 
-No melds
-
-
-4*'s hand: 
-10♥ 10♣ 10♠ 9♥ 
-10♠ K♣ Q♣ K♠ 
-J♦ A♠ Q♦ 9♦ 
-
-Melds: 
-dix :10points
+    No melds
 
 
-Team1:60 = bids1:10 + cardPoints1:50
-Team2:60 = bids2:10 + cardPoints2:50
-Misdeal
-Same bid score! Deal Again (Press any key)
+    3's hand: 
+    Q♣ K♥ A♦ A♣ 
+    A♦ J♣ J♦ Q♥ 
+    A♥ K♠ Q♥ J♠ 
+
+    No melds
+
+
+    4*'s hand: 
+    10♥ 10♣ 10♠ 9♥ 
+    10♠ K♣ Q♣ K♠ 
+    J♦ A♠ Q♦ 9♦ 
+
+    Melds: 
+    dix :10points
+
+
+    Team1:60 = bids1:10 + cardPoints1:50
+    Team2:60 = bids2:10 + cardPoints2:50
+    Misdeal
+    Same bid score! Deal Again (Press any key)
+
+
+2. Pinochle Game, Typical play round & Game Over:
+    Dealing cards...
+    Trump suit is ♥
+    A*'s hand: 
+    Q♦ 10♥ J♥ 9♣ 
+    A♦ 9♠ A♣ Q♦ 
+    A♠ 9♠ K♣ J♥ 
+
+    No melds
+
+
+    B's hand: 
+    Q♥ K♥ A♥ A♥ 
+    K♥ K♠ J♦ J♠ 
+    10♠ J♣ A♠ 10♠ 
+
+    No melds
+
+
+    C's hand: 
+    9♦ A♣ A♦ 9♦ 
+    10♣ 10♦ 10♦ 9♥ 
+    Q♣ K♦ Q♠ Q♠ 
+
+    Melds: 
+    dix :10points
+
+
+    D's hand: 
+    10♣ J♦ K♦ K♠ 
+    Q♣ Q♥ J♠ K♣ 
+    J♣ 10♥ 9♣ 9♥ 
+
+    Melds: 
+    dix :10points
+
+
+    Team1:68 = bids1:10 + cardPoints1:58
+    Team2:59 = bids2:10 + cardPoints2:49
+    Team 1 wins the contract
+
+    Team 1's bid goal: 10
+
+    Team 2's bid goal: 10
+
+    C has the highest bid and is the first player to play
+    Turn 1 starts:
+    C is the first player to play this round
+    C plays A♦
+    D plays J♦
+    A plays Q♦
+    B plays J♦
+    C wins the trick in round 1 with A♦
+
+    A♦ J♦ Q♦ J♦ 
+
+    Turn 2 starts:
+    C is the first player to play this round
+    C plays A♣
+    D plays 9♣
+    A plays 9♣
+    B plays J♣
+    C wins the trick in round 2 with A♣
+
+    A♣ 9♣ 9♣ J♣ 
+
+    Turn 3 starts:
+    C is the first player to play this round
+    C plays 10♦
+    D plays K♦
+    A plays Q♦
+    B plays A♠
+    C wins the trick in round 3 with 10♦
+
+    10♦ K♦ Q♦ A♠ 
+
+    Turn 4 starts:
+    C is the first player to play this round
+    C plays 10♦
+    D plays 10♥
+    A plays A♦
+    B plays A♥
+    B wins the trick in round 4 with A♥
+
+    10♦ 10♥ A♦ A♥ 
+
+    Turn 5 starts:
+    B is the first player to play this round
+    B plays A♥
+    C plays 9♥
+    D plays 9♥
+    A plays J♥
+    B wins the trick in round 5 with A♥
+
+    A♥ 9♥ 9♥ J♥ 
+
+    Turn 6 starts:
+    B is the first player to play this round
+    B plays 10♠
+    C plays Q♠
+    D plays J♠
+    A plays 9♠
+    B wins the trick in round 6 with 10♠
+
+    10♠ Q♠ J♠ 9♠ 
+
+    Turn 7 starts:
+    B is the first player to play this round
+    B plays 10♠
+    C plays Q♠
+    D plays K♠
+    A plays 9♠
+    B wins the trick in round 7 with 10♠
+
+    10♠ Q♠ K♠ 9♠ 
+
+    Turn 8 starts:
+    B is the first player to play this round
+    B plays K♥
+    C plays 9♦
+    D plays Q♥
+    A plays 10♥
+    A wins the trick in round 8 with 10♥
+
+    K♥ 9♦ Q♥ 10♥ 
+
+    Turn 9 starts:
+    A is the first player to play this round
+    A plays A♠
+    B plays J♠
+    C plays 9♦
+    D plays J♣
+    A wins the trick in round 9 with A♠
+
+    A♠ J♠ 9♦ J♣ 
+
+    Turn 10 starts:
+    A is the first player to play this round
+    A plays A♣
+    B plays K♠
+    C plays Q♣
+    D plays Q♣
+    A wins the trick in round 10 with A♣
+
+    A♣ K♠ Q♣ Q♣ 
+
+    Turn 11 starts:
+    A is the first player to play this round
+    A plays K♣
+    B plays K♥
+    C plays 10♣
+    D plays K♣
+    B wins the trick in round 11 with K♥
+
+    K♣ K♥ 10♣ K♣ 
+
+    Turn 12 starts:
+    B is the first player to play this round
+    B plays Q♥
+    C plays K♦
+    D plays 10♣
+    A plays J♥
+    B wins the trick in round 12 with Q♥
+
+    Q♥ K♦ 10♣ J♥ 
+
+    Team 1 meets the contract bid
+    ==============================
+            Game Over!          
+    Team 1 score: 1610
+    Team 2 score: 1400
+    Winner: Team 1
+    ==============================

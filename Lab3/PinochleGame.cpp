@@ -281,6 +281,7 @@ void PinochleGame::playTricks(std::vector<unsigned int> &bids, std::vector<unsig
         CardSet<PinochleRank, Suit> trick_thisRound;
         Suit lead_suit = Suit::undefined;
         PinochleRank lead_rank = PinochleRank::undefined;
+        // ================== play a trick ==================
         while (player_count < PinochleGameGameRules::num_of_players){
             int i = (first_player + player_count) % PinochleGameGameRules::num_of_players;
             // Get the hand of the current player
@@ -308,16 +309,13 @@ void PinochleGame::playTricks(std::vector<unsigned int> &bids, std::vector<unsig
             // 2. If a non-trump suit was led, and the player has a card of that suit, then if no trump cards have been played so far in that trick, and they have a higher card in the suit that was led than any other card of that suit so far in the trick, they should play the highest card they have in the suit that was led
             // 3. If a non-trump suit was led, and the player has a card of that suit, but a trump card or a higher card than they have in the suit that was led has been played so far in that trick, they should play their lowest ranked card of the suit that was led
             // 4. If a player does not have a card of the non-trump suit that was led, then if they have a trump card that is higher in rank than any other trump card that has been played, they should play their highest ranked trump card; otherwise they should play the lowest ranked card of any non-trump suit
+            // ================== Follow a card ================
             else if (i != first_player){
                 // printMap(map);
                 PinochleRank highest_rank = findHighestRank(map); // highest rank in the hand
                 PinochleRank highest_rank_trump = findHighestRankwS(map, trump_suit); // highest rank in the hand of the trump suit
                 PinochleRank lowest_rank = findLowestRank(map); // lowest rank in the hand
                 PinochleRank lowest_rank_trump = findLowestRankwS(map, trump_suit); // lowest rank in the hand of the trump suit
-                // cout << "highest rank: " << highest_rank << endl;
-                // cout << "highest rank trump: " << highest_rank_trump << endl;
-                // cout << "lowest rank: " << lowest_rank << endl;
-                // cout << "lowest rank trump: " << lowest_rank_trump << endl;
 
                 // extract the cards in the trick_thisRound into a vector
                 vector<Card<PinochleRank, Suit>> trick_cards_vector;
@@ -351,7 +349,7 @@ void PinochleGame::playTricks(std::vector<unsigned int> &bids, std::vector<unsig
                             PlayThisCard(highest_rank_wSuit, lead_suit, trick_thisRound, map, i);
                         }
                         // if the player has a card of that suit, but a trump card or a higher card than they have in the suit that was led has been played so far in that trick, they should play their lowest ranked card of the suit that was led
-                        else if (trump_played == true && findHighestRankwS(map, lead_suit) > highest_rank){
+                        else if (trump_played == true || findHighestRankwS(map, lead_suit) <= highest_rank){
                             PinochleRank lowest_rank_wSuit = findLowestRankwS(map, lead_suit);
                             PlayThisCard(lowest_rank_wSuit, lead_suit, trick_thisRound, map, i);
                         }
@@ -379,7 +377,7 @@ void PinochleGame::playTricks(std::vector<unsigned int> &bids, std::vector<unsig
         }
         
         
-
+        // ======== determine the winner of the trick this round ========
         // extract the cards in the trick_thisRound into a vector
         vector<Card<PinochleRank, Suit>> trick_cards_vector;
         for (int i = 0; i < static_cast<int>(trick_thisRound.getSize()); i++){
@@ -390,38 +388,34 @@ void PinochleGame::playTricks(std::vector<unsigned int> &bids, std::vector<unsig
         // determine the winner of the trick this round
         // If trump was played, the player who first played the highest-ranked card of the trump suit wins the trick; 
         if (trump_played){
-            std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map = convertCardSetToMap(trick_thisRound);
             // find the highest card in the hand and play it to the trick
-            PinochleRank highest_rank = findHighestRankwS(map, trump_suit);
+            PinochleRank highest_rank = findHighestRankwS(trick_cards_vector, trump_suit);
 
             // find the player who played the highest card
             for (int i = 0; i < PinochleGameGameRules::num_of_players; i++){
                 int j = (first_player + i) % PinochleGameGameRules::num_of_players;
-                if (trick_cards_vector[j].rank == highest_rank && trick_cards_vector[j].suit == trump_suit){
+                if (highest_rank != PinochleRank::undefined && trick_cards_vector[i].rank == highest_rank && trick_cards_vector[i].suit == trump_suit){
                     first_player = j;
-                    calculateScore(i, turn, scores, trick_cards_vector);
+                    calculateScore(j, i, turn, scores, trick_cards_vector);
                     break;
                 }
             }
         } 
         // otherwise if trump was not played, the player who first played the highest-ranked card of the suit that was led wins the trick -- if a trick has two cards of the same highest rank (e.g., both tens) of the trump suit, or of the suit that was led if no trump was played, the player who played the first of those cards wins the trick.
         else{
-            std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map = convertCardSetToMap(trick_thisRound);
-            // find the highest card in the hand and play it to the trick
-            PinochleRank highest_rank = findHighestRankwS(map, lead_suit);
-
+            PinochleRank highest_rank = findHighestRankwS(trick_cards_vector, lead_suit);
             // find the player who played the highest card
             for (int i = 0; i < PinochleGameGameRules::num_of_players; i++){
                 int j = (first_player + i) % PinochleGameGameRules::num_of_players;
-                if (trick_cards_vector[j].rank == highest_rank && trick_cards_vector[j].suit == lead_suit){
+                if (highest_rank != PinochleRank::undefined && trick_cards_vector[i].rank == highest_rank && trick_cards_vector[i].suit == lead_suit){
                     first_player = j;
-                    calculateScore(i, turn, scores, trick_cards_vector);
+                    calculateScore(j, i, turn, scores, trick_cards_vector);
                     break;
                 }
             }
         }
 
-        // print out the trick
+        // ============= print out the trick ==============
         trick_thisRound.print(cout, print_format_4);
         // push trick_thisRound to trick
         int trick_size = static_cast<int>(trick_thisRound.getSize());
@@ -430,12 +424,21 @@ void PinochleGame::playTricks(std::vector<unsigned int> &bids, std::vector<unsig
         }
         turn++;
     }
-    // collect the cards from the trick
+    // ============ collect the cards from the trick ============
     deck.collect(trick);
 }
 
-void PinochleGame::calculateScore(int j, int& turn, std::vector<unsigned int> &scores, std::vector<Card<PinochleRank, Suit>>& trick_cards_vector){
-    cout << players[j] << " wins the trick in round " << turn+1 << " with " << trick_cards_vector[j] << endl << endl;
+/**
+ * @brief calculate the score of the player who wins the trick
+ * 
+ * @param j 
+ * @param i 
+ * @param turn 
+ * @param scores 
+ * @param trick_cards_vector 
+ */
+void PinochleGame::calculateScore(int j, int i, int& turn, std::vector<unsigned int> &scores, std::vector<Card<PinochleRank, Suit>>& trick_cards_vector){
+    cout << players[j] << " wins the trick in round " << turn+1 << " with " << trick_cards_vector[i] << endl << endl;
     if (j == 0 || j == 2){
         scores[0] += 20;
         if (turn == PinochleGameGameRules::num_of_turns-1){
@@ -450,6 +453,14 @@ void PinochleGame::calculateScore(int j, int& turn, std::vector<unsigned int> &s
     }
 }
 
+/**
+ * @brief check if trump was played
+ * 
+ * @param trick_cards_vector 
+ * @param trump_suit 
+ * @return true 
+ * @return false 
+ */
 bool PinochleGame::checkTrumpPlayed(std::vector<Card<PinochleRank, Suit>> trick_cards_vector, Suit trump_suit){
     bool trump_played = false;
     // check if trump was played
@@ -461,6 +472,15 @@ bool PinochleGame::checkTrumpPlayed(std::vector<Card<PinochleRank, Suit>> trick_
     return trump_played;
 }
 
+/**
+ * @brief Play the card given the rank and suit
+ * 
+ * @param rank 
+ * @param suit 
+ * @param trick_thisRound 
+ * @param map 
+ * @param i 
+ */
 void PinochleGame::PlayThisCard(PinochleRank& rank, Suit& suit, CardSet<PinochleRank, Suit>& trick_thisRound, std::unordered_map<PinochleRank,std::unordered_map<Suit,int>>& map, int i){
     cout << players[i] << " plays " << Card<PinochleRank, Suit>(rank, suit) << endl;
     map[rank][suit]--;
@@ -471,7 +491,27 @@ void PinochleGame::PlayThisCard(PinochleRank& rank, Suit& suit, CardSet<Pinochle
     trick_thisRound.addCard(Card<PinochleRank, Suit>(rank, suit));
 }
 
-
+/**
+ * @brief find the highest rank of the suit that was led
+ * 
+ * @param trick_cards_vector 
+ * @param lead_suit 
+ * @return PinochleRank 
+ */
+PinochleRank PinochleGame::findHighestRankwS(std::vector<Card<PinochleRank, Suit>> trick_cards_vector, Suit lead_suit){
+    // find the highest card in the hand and play it to the trick
+    PinochleRank highest_rank = PinochleRank::undefined;
+    for (int i = 0; i < static_cast<int>(trick_cards_vector.size()); i++){
+        if (trick_cards_vector[i].suit == lead_suit){
+            if (highest_rank == PinochleRank::undefined)
+                highest_rank = trick_cards_vector[i].rank;
+            if (trick_cards_vector[i].rank > highest_rank){
+                highest_rank = trick_cards_vector[i].rank;
+            }
+        }
+    }
+    return highest_rank;
+}
 
 PinochleRank PinochleGame::findHighestRank(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map){
     // find the highest card in the hand and play it to the trick
@@ -551,6 +591,13 @@ Suit PinochleGame::findLowestSuit(std::unordered_map<PinochleRank,std::unordered
     return lowest_suit;
 }
 
+/**
+ * @brief bid execution, determine the contract
+ * 
+ * @param bids 
+ * @param contract 
+ * @return int 
+ */
 int PinochleGame::bid(std::vector<unsigned int> &bids, unsigned int &contract){
     // Each player should then store the value of their bid at the appropriate position in the bids vector
     // The first and third players are a team, and the second and fourth players are a team: the bids of the players on the same team should be added together and the team with the highest sum of their bids is awarded the contract for that deal; if both teams have the same combined bid score, however, a misdeal is declared and the cards are re-dealt from the same dealer position, the trump suit is again determined by the last card, and bidding is repeated again
@@ -705,7 +752,13 @@ std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> PinochleGame::conv
 }
 
 
-
+/**
+ * @brief suit dependent evaluation that calculates melds for a specific suit
+ * 
+ * @param cs 
+ * @param melds 
+ * @param s 
+ */
 void PinochleGame::suit_dependent_evaluation(const CardSet<PinochleRank, Suit> &cs, std::vector<PinochleMelds> &melds, Suit s){
     std::unordered_map<PinochleRank,std::unordered_map<Suit,int> > m = convertCardSetToMap(cs);
 
@@ -731,6 +784,11 @@ void PinochleGame::suit_dependent_evaluation(const CardSet<PinochleRank, Suit> &
     }
 }
 
+/**
+ * @brief helper function to print out the map, used for debugging
+ * 
+ * @param map 
+ */
 void PinochleGame::printMap(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map){
     for(auto m:map){
         cout << m.first << ": ";
@@ -741,6 +799,13 @@ void PinochleGame::printMap(std::unordered_map<PinochleRank,std::unordered_map<S
     }
 }
 
+/**
+ * @brief helper function to find the first player to play a trick
+ * 
+ * @param bids 
+ * @param contract 
+ * @return int 
+ */
 int PinochleGame::findFirstPlayer(std::vector<unsigned int> &bids, unsigned int &contract){
     // find the first player with the greatest bid in bids in which winning the contract
     if(contract == 1){

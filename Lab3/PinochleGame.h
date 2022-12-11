@@ -65,6 +65,7 @@ private:
     PinochleRank findHighestRank(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map);
     PinochleRank findLowestRank(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map);
     PinochleRank findHighestRankwS(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> &map, Suit &suit);
+    PinochleRank findHighestRankwS(std::vector<Card<PinochleRank, Suit>> trick_cards_vector, Suit lead_suit);
     PinochleRank findLowestRankwS(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> &map, Suit &suit);
     Suit findHighestSuit(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> &map, PinochleRank &highest_rank);
     Suit findLowestSuit(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> &map, PinochleRank &lowest_rank);
@@ -75,6 +76,6 @@ private:
     bool checkTrumpPlayed(std::vector<Card<PinochleRank, Suit>> trick_cards_vector, Suit trump_suit);
     void printMap(std::unordered_map<PinochleRank,std::unordered_map<Suit,int>> map);
     void PlayThisCard(PinochleRank& rank, Suit& suit, CardSet<PinochleRank, Suit>& trick_thisRound, std::unordered_map<PinochleRank,std::unordered_map<Suit,int>>& map, int i);
-    void calculateScore(int j, int& turn, std::vector<unsigned int> &scores, std::vector<Card<PinochleRank, Suit>>& trick_cards_vector);
+    void calculateScore(int j, int i, int& turn, std::vector<unsigned int> &scores, std::vector<Card<PinochleRank, Suit>>& trick_cards_vector);
 };
 
