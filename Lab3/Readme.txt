@@ -29,6 +29,21 @@ Errors and Warning jornals:
         the index i should be used to access the vector of cards trick_cards_vector[i], not the index j.
         the index j should be used to access vector of players[j], not the index i.
     
+    2. HoleEm Game
+
+    error:
+    HoldEmGame.cpp: In member function ‘HoldEmAction HoldEmGame::action(int)’:
+    HoldEmGame.cpp:588:22: error: ‘currentPlayerInd’ was not declared in this scope
+         if(!ifRaise&&currentPlayerInd==bigblindInd)
+    changed ‘currentPlayerInd’ to 'playerInd'
+
+    
+    warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+         if(scores[i]=0){
+
+         changed to 
+        if(scores[i]==0){
+
 
 
 Class Design:
@@ -123,12 +138,18 @@ PinochleGame:
         - Added bug fix function such as PrintMap, not used in final evaluation.
 
 HoldEmGame:
-    13: 
-        We used a 2d vector. Outer dimension is number of player, inner dimension is possible card combination. In flop it only has 1 possible combination; for turn, 
-        there are 4 possible combination; for river, it has 10 possible combination. 
+13: 
+We added a vector bestCardCombinition which stores the best possible cardset for each player
+In flop state, there are 3 cards on board and 2 cards in hand, so if we pick 5 out of 5, there is only 1 card combination.
+In turn state, there are 4 cards on board and 2 cards in hand,  6 card combination.
+In river state, there are 5 cards on board and 2 cards in hand, 21 card combination.
 
-        For each player at each round, we can call sort to sort the possible card combination of that player.
-
+We used a 2d vector. Outer dimension is number of player, inner dimension is possible card combination. 
+In flop it only has 1 possible combination; 
+for turn, there are 6 possible combination; 
+for river, it has 21 possible combination. 
+For each player at each round, we can call sort to sort the possible card combination of that player.
+Then we compare the best combination of each player.
 
 
 
@@ -191,25 +212,25 @@ function:
                 - check if has a pair of king/queen/jack; 
                     if yes, return raise if chipsCurrentRound[i]==0 (check if this is the first bet); otherwise return call 
                 - check if two cards in hand are consective/has pair/has same suit, return call
-                - otherwise return fold    
+                - otherwise return fold if there is raise/check if there is no raise    
             if flop state:
                 - check if has three same rank; if yes return raise
                 - check if has two pair; 
                     if yes, return raise if chipsCurrentRound[i]==0; otherwise return call 
                 - check if has 4 consective ranks/has pair/has 4 same suit, return call
-                - otherwise return fold 
+                - otherwise return fold if there is raise/check if there is no raise    
             if turn state:
                 - check if has straight(); if yes return raise
                 - check if has three same ran
                      if yes, return raise if chipsCurrentRound[i]==0; otherwise return call 
                 - check if hasPair/hasTwoPair/hasConsective(4)/hasSameSuit(Diamond/../../Spade, 4), return call
-                - otherwise return fold 
+                - otherwise return fold if there is raise/check if there is no raise    
             if river state:
                 - check if has Straight; if yes return raise
                 - check if has Three Same Rank 
                      if yes, return raise if chipsCurrentRound[i]==0; otherwise return call  
                 - check if has Two Pair, return call
-                - otherwise return fold 
+                - otherwise return fold if there is raise/check if there is no raise    
 
 16: We are running out of time so we only consider the case that there is no 
  indistinguishably best. In this case sum the chips in chipsInPot, 

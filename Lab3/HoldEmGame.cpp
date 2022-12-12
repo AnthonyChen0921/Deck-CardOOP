@@ -24,7 +24,9 @@ HoldEmGame::HoldEmGame(int argc, const char *argv[]) : Game(argc, argv), state(H
         scores.push_back(HoldEmGameInitialScore);
         chipsInPot.push_back(0);
         chipsCurrentRound.push_back(0);
+        seats[players[i]]=i;
     }
+    winnerName=players[bigblindInd];
 }
 
 std::ostream &operator<<(std::ostream &os, const HoldEmHandRank &rank){
@@ -159,51 +161,61 @@ void HoldEmGame::printBoard(string s) {
  * 
  */
 void HoldEmGame::evaluate() {
-    vector<Card<HoldEmRank, Suit>> CardSet<HoldEmRank, Suit>::*ptrToCards=CardSet<HoldEmRank, Suit>::getCardsPtr();
-    auto cardsOnBoard = board.*ptrToCards;
-    int ncard=cardsOnBoard.size();
-    int nchoice;
-    if(ncard==3)
-        nchoice=1;
-    if(ncard==4)
-        nchoice=4;
-    if(ncard==5)
-        nchoice=10;
-    
     vector<vector<HoldEmPlayer>> vHoldEmPlayers;
     vector<HoldEmPlayer> maxPossibleCards;
     for (int i = 0; i < static_cast<int>(hands.size()); i++){
-        vector<HoldEmPlayer> p;
-        for(int j=0;j<nchoice;j++){
-            HoldEmPlayer tmpPlayer(players[i],hands[i], HoldEmHandRank::undefined);
-            p.push_back(tmpPlayer);
+        //construct a cardset containing all cards in hand and board
+        auto cardsInHand = hands[i];
+        for(size_t j=0;j<board.getSize();j++){
+            cardsInHand.addCard(board[j]);
         }
+        int nc=cardsInHand.getSize();
+        vector<HoldEmPlayer> p;
+        for(int a=0;a<nc;a++){
+            for(int b=a+1;b<nc;b++){
+                for(int c=b+1;c<nc;c++){
+                    for(int d=c+1;d<nc;d++){
+                        for(int e=d+1;e<nc;e++){
+                            CardSet<HoldEmRank, Suit> tmpHand;
+                            tmpHand.addCard(cardsInHand[a]);
+                            tmpHand.addCard(cardsInHand[b]);
+                            tmpHand.addCard(cardsInHand[c]);
+                            tmpHand.addCard(cardsInHand[d]);
+                            tmpHand.addCard(cardsInHand[e]);
+                            HoldEmPlayer tmpPlayer(players[i],tmpHand,HoldEmHandRank::undefined);
+                            tmpPlayer.rank=holdem_hand_evaluation (tmpPlayer.hand);
+                            p.push_back(tmpPlayer);
+                        }
+                    }
+                }
+            }
+        }                  
         vHoldEmPlayers.push_back(p);
     }            
     //(1) add all cards from the common board of cards to the two cards (from the player's hand) in each element's CardSet and then 
     //(2) remove 0/1/2 cards from hand to make it
     for(size_t i=0;i<vHoldEmPlayers.size();i++){ 
-        for(size_t j=0;j<vHoldEmPlayers[0].size();j++){          
-            //continous
-            for(size_t k=j;k<j+3;k++){
-                vHoldEmPlayers[i][j].hand.addCard(cardsOnBoard[k]);
-            }
-            vHoldEmPlayers[i][j].rank=holdem_hand_evaluation (vHoldEmPlayers[i][j].hand);
-        }
         sort(vHoldEmPlayers[i].begin(),vHoldEmPlayers[i].end());
-        maxPossibleCards.push_back(vHoldEmPlayers[i][nchoice-1]);
+        maxPossibleCards.push_back(vHoldEmPlayers[i][vHoldEmPlayers[i].size()-1]);
     }
 
     //sort the vector and print out (from the highest ranked to the lowest) each player's name, 
     //card set (which includes the player's cards and the cards from the common board of cards), and hand rank at that point in the game.
     sort(maxPossibleCards.begin(),maxPossibleCards.end());
-    cout<<"-------Print out from the highest ranked to the lowest player and their cards:-------------"<<endl;
+    cout<<"-------Print out from the highest ranked to the lowest player on the table and their cards:-------------"<<endl;
     for(int i=maxPossibleCards.size()-1;i>=0;i--){
-        cout << maxPossibleCards[i].name << " has "<< maxPossibleCards[i].rank<< endl;
-        cout <<"card in "<< maxPossibleCards[i].name << "'s hand: " << endl;
-        maxPossibleCards[i].hand.print(cout, GameRules::print_format_5);
+        if(!ifFold[seats[maxPossibleCards[i].name]]){
+            cout << maxPossibleCards[i].name << " has "<< maxPossibleCards[i].rank<< endl;
+            cout <<"card in "<< maxPossibleCards[i].name << "'s hand: " << endl;
+            maxPossibleCards[i].hand.print(cout, GameRules::print_format_5);
+        }   
     }
-    winnerName = maxPossibleCards[maxPossibleCards.size()-1].name;
+    for(int i=maxPossibleCards.size()-1;i>=0;i--){
+        if(!ifFold[seats[maxPossibleCards[i].name]]){
+            winnerName = maxPossibleCards[i].name;
+            break;
+        }
+    }
 }
   
 
@@ -219,7 +231,7 @@ int HoldEmGame::play() {
     while (true) {
         // shuffle the deck
         deck.shuffle();
-
+        int nfolded; //track the number of folded players
         // reset state
         state = HoldEmState::preflop;
               // deal cards to each player's hand
@@ -227,27 +239,53 @@ int HoldEmGame::play() {
         printPlayersHand();
         bet();
         
-        state = HoldEmState::flop;
-        // deal cards to the board in 3 rounds
-        deal();
-        printBoard("Flop: ");
-        bet();
-        evaluate();
+        nfolded = 0;
+        for(auto b:ifFold){
+            nfolded += b;
+        }
+        if(nfolded>=players.size()-1){
+            cout<<"only 1 player didn't fold his cards, ending the game..." <<endl;
+            cout<<"winner is "<<winnerName<<endl;
+        }
+        else{
 
-
-        state = HoldEmState::turn;
-        deal();
-        printBoard("Turn: ");
-        bet();
-        evaluate();
-        for(auto c:scores)
-            cout<<c<<endl;
-        state = HoldEmState::river;
-        deal();
-        printBoard("River: ");
-        bet();
-        evaluate();
-
+            state = HoldEmState::flop;
+            // deal cards to the board in 3 rounds
+            deal();
+            printBoard("Flop: ");
+            bet();
+            evaluate();
+        
+            nfolded = 0;
+            for(auto b:ifFold){
+                nfolded += b;
+            }
+            if(nfolded>=players.size()-1){
+                cout<<"only 1 player didn't fold his cards, ending the game..." <<endl;
+                cout<<"winner is "<<winnerName<<endl;
+            }
+            else{
+                state = HoldEmState::turn;
+                deal();
+                printBoard("Turn: ");
+                bet();
+                evaluate();
+                nfolded = 0;
+                for(auto b:ifFold){
+                    nfolded += b;
+                }
+                if(nfolded>=players.size()-1){
+                    cout<<"only 1 player didn't fold his cards, ending the game..." <<endl;
+                    cout<<"winner is "<<winnerName<<endl;
+                }
+                state = HoldEmState::river;
+                deal();
+                printBoard("River: ");
+                bet();  
+                evaluate();
+            }
+        }
+        
         collectCardsFromPlayer();
         collectCardsFromBoard();
         cout<<"winner is "<<winnerName<<endl;
@@ -441,11 +479,9 @@ void HoldEmGame::bet(){
     int playerNumber = players.size();
     int actedPlayer=0; //round before floop
     int currentRoundMaximumChip;
-    int initialChip;
+    
     int currentPlayerInd;
     int raiseChip;
-    int bigblindInd=1;
-    int smallblindInd=0;
     if(state==HoldEmState::preflop){
         //assume player 0 and player 1 are small blind and big blind;
         //automatically add bet for small and big blind
@@ -455,25 +491,21 @@ void HoldEmGame::bet(){
         scores[bigblindInd] -= 2;
         raiseChip = 2;
         currentRoundMaximumChip=2;
-        initialChip=2;
         currentPlayerInd = bigblindInd+1;
     }
     if(state==HoldEmState::flop){
         raiseChip = 2;
         currentRoundMaximumChip=0;
-        initialChip=0;
         currentPlayerInd = 2;
     }
     if(state==HoldEmState::turn){
         raiseChip = 4;
         currentRoundMaximumChip=0;
-        initialChip=0;
         currentPlayerInd = 2;
     }
     if(state==HoldEmState::river){
         raiseChip = 4;
         currentRoundMaximumChip=0;
-        initialChip=0;
         currentPlayerInd = 2;
     }
 
@@ -488,8 +520,10 @@ void HoldEmGame::bet(){
          }
         else{
             auto playerAction = action(currentPlayerInd);
-            std::cout<<players[currentPlayerInd]<<"'s turn, chose ";
-
+            std::cout<<players[currentPlayerInd]<<"'s turn, he chose ";
+            if(playerAction==HoldEmAction::check){
+                cout<<"check"<<std::endl;
+            }
             if(playerAction==HoldEmAction::fold){
                 cout<<"fold"<<std::endl;
                 ifFold[currentPlayerInd]=true;
@@ -531,7 +565,13 @@ void HoldEmGame::bet(){
     }
     //end the round
     cout<<"end betting round"<<endl;
-    
+    //clear chips in pot
+    for(size_t i=0;i<chipsCurrentRound.size();i++){
+        chipsInPot[i] += chipsCurrentRound[i];
+        chipsCurrentRound[i] = 0;
+    }
+
+
     cout<<"players not folded:"<<endl;
     for(size_t i=0;i<players.size();i++){
         if(!ifFold[i])
@@ -546,10 +586,20 @@ void HoldEmGame::bet(){
 
 
 HoldEmAction HoldEmGame::action(int PlayerInd){
-    //preflop only check 2 cards in hand     
     auto cardsInHand = hands[PlayerInd];
 
+    //check if there is any raise by checking if any entry in chipsCurrentRound 
+    // is above the initial chip
+    bool ifRaise=false;
+    for(auto i:chipsCurrentRound){
+        if( ((state==HoldEmState::preflop) && (i>2)) || ((state!=HoldEmState::preflop) && (i>0))){
+            ifRaise=true;
+            break;
+        }
+    }
+
     if(state==HoldEmState::preflop){
+ 
         //check a pair of ace
         if(static_cast<int>(cardsInHand[static_cast<int>(arrayIndex::firstCard)].rank)==static_cast<int>(Rank::ace)
             && static_cast<int>(cardsInHand[static_cast<int>(arrayIndex::secondCard)].rank)==static_cast<int>(Rank::ace))
@@ -561,20 +611,31 @@ HoldEmAction HoldEmGame::action(int PlayerInd){
             if( static_cast<int>(cardsInHand[static_cast<int>(arrayIndex::firstCard)].rank)>static_cast<int>(Rank::ten)  ){
                     if(chipsCurrentRound[PlayerInd]==0)
                         return HoldEmAction::raise;
-                    else
-                        return HoldEmAction::call;
-            }
+                    else{
+                        if(!ifRaise)
+                            return HoldEmAction::check;
+                        else
+                            return HoldEmAction::call;                    }
+                    }
             //a pair of others
-            return HoldEmAction::call;
-        }        
+            if(!ifRaise)
+                return HoldEmAction::check;
+            else
+                return HoldEmAction::call;
+            }               
+
         //check if consective
         auto firstRand=cardsInHand[static_cast<int>(arrayIndex::firstCard)].rank;
         if(++firstRand == cardsInHand[static_cast<int>(arrayIndex::secondCard)].rank)
             return HoldEmAction::call;
         //check if same suit
         if(cardsInHand[static_cast<int>(arrayIndex::firstCard)].suit== cardsInHand[static_cast<int>(arrayIndex::secondCard)].suit)
-            return HoldEmAction::call;      
-        return HoldEmAction::fold;   
+            return HoldEmAction::call;    
+        if(!ifRaise&&PlayerInd==bigblindInd)  
+            return HoldEmAction::check;
+        else
+            return HoldEmAction::fold;
+
     }    
     for(size_t i=0;i<board.getSize();i++){
         cardsInHand.addCard(board[i]);
@@ -620,7 +681,10 @@ HoldEmAction HoldEmGame::action(int PlayerInd){
             if(c.second==4)
                 return  HoldEmAction::call;
         }
-        return HoldEmAction::fold;   
+        if(ifRaise)  
+            return HoldEmAction::fold;
+        else   
+            return HoldEmAction::check;    
     }
     if(state==HoldEmState::turn){
         //check if has straight
@@ -628,13 +692,17 @@ HoldEmAction HoldEmGame::action(int PlayerInd){
             (v[1]==v[2]-1 && v[1]==v[3]-2 && v[1]==v[4]-4 && v[1]==v[5]-5))
             return  HoldEmAction::call;
         //check if has three same rank
+        bool hasThree=false;
         for(auto c:rankMap){
             if(c.second>=3){
-                if(chipsCurrentRound[PlayerInd]==0)
-                    return HoldEmAction::raise;
-                else
-                    return HoldEmAction::call;
+                hasThree=true;
             }
+        }
+        if(hasThree){
+            if(chipsCurrentRound[PlayerInd]==0)
+                return HoldEmAction::raise;
+            else
+               return HoldEmAction::call;
         }
         for(auto c:rankMap){
             int npair=0;
@@ -655,22 +723,47 @@ HoldEmAction HoldEmGame::action(int PlayerInd){
             if(c.second==4)
                 return  HoldEmAction::call;
         }
-        return HoldEmAction::fold;   
+        if(ifRaise)  
+            return HoldEmAction::fold;
+        else   
+            return HoldEmAction::check;
     }
     if(state==HoldEmState::river){
-        //check if has straight
-        if( (v[0]==v[1]-1 && v[0]==v[2]-2 && v[0]==v[3]-3 && v[0]==v[3]-4)||
-            (v[1]==v[2]-1 && v[1]==v[3]-2 && v[1]==v[4]-4 && v[1]==v[5]-5)||
-            (v[2]==v[3]-1 && v[2]==v[4]-2 && v[2]==v[5]-4 && v[2]==v[6]-5))
-            return  HoldEmAction::call;
-        //check if has three same rank
+        bool hasThree=false;
+        bool hasPair=false;
+        //check flush
+        for(auto c:suitMap){
+            if(c.second==5)
+                return  HoldEmAction::raise;
+        }
+        //check fourofakind 
         for(auto c:rankMap){
-            if(c.second>=3){
-                if(chipsCurrentRound[PlayerInd]==0)
-                    return HoldEmAction::raise;
-                else
-                    return HoldEmAction::call;
-            }
+            if(c.second==4)
+                return  HoldEmAction::raise;
+        }
+
+        //check fullhouse 
+        for(auto c:rankMap){
+            if(c.second==3)
+                hasThree=true;
+            if(c.second==2)
+                hasPair=true;
+        }
+        if(hasPair&&hasThree)
+            return  HoldEmAction::raise;
+
+        //check if has straight
+        if( ( (v[0]==v[1]-1) && (v[0]==v[2]-2) && (v[0]==v[3]-3) && (v[0]==v[4]-4))||
+            (v[1]==v[2]-1 && v[1]==v[3]-2 && v[1]==v[4]-3 && v[1]==v[5]-4)||
+            (v[2]==v[3]-1 && v[2]==v[4]-2 && v[2]==v[5]-3 && v[2]==v[6]-4))
+            return  HoldEmAction::raise;
+
+        //check if has three same rank
+        if(hasThree){
+            if(chipsCurrentRound[PlayerInd]==0)
+                return HoldEmAction::raise;
+            else
+               return HoldEmAction::call;
         }
         for(auto c:rankMap){
             int npair=0;
@@ -681,16 +774,22 @@ HoldEmAction HoldEmGame::action(int PlayerInd){
                 return HoldEmAction::call;
             }
         }
-        return HoldEmAction::fold;
+        if(ifRaise)  
+            return HoldEmAction::fold;
+        else   
+            return HoldEmAction::check;
     }
     
-    return HoldEmAction::fold;
-
+    if(ifRaise)  
+        return HoldEmAction::fold;
+    else   
+        return HoldEmAction::check;
 }
 
 
 
 void HoldEmGame::resetChips(){
+    cout<<"----------------------------reseting the chips------------------------------------"<<endl;
     int winnerInd;
     for (int i = 0; i < static_cast<int>(players.size()); i++) {
         if(players[i]==winnerName)
@@ -702,9 +801,15 @@ void HoldEmGame::resetChips(){
         chipsInPot[i]=0;
         chipsCurrentRound[i]=0;
     }     
+
+    for (int i = 0; i < static_cast<int>(players.size()); i++) {
+        cout<<players[i]<< " has "<<scores[i]<< " chips after this game" <<endl;
+    }
+
     for (int i = static_cast<int>(players.size())-1;i>=0;i--) {
-        if(scores[i]=0){
-            cout<<players[i] <<" has 0 score and will be kicked out of the game" <<endl;
+        if(scores[i]==0){
+            cout<<players[i] <<" has 0 score and will be kicked out of the game, he is No."
+            << players.size() <<endl;
             kickplayer(i);
         }
     }

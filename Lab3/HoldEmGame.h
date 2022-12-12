@@ -11,6 +11,7 @@
 #include "HoldEmDeck.h"
 #include "function.h"
 #include <string>
+#include <unordered_map>
 
 //Declare an enum class HoldEmHandRank enumerated type
 enum class HoldEmHandRank{
@@ -36,7 +37,8 @@ enum class HoldEmState {
 
 
 enum class HoldEmAction {
-    fold=0,
+    check=0,
+    fold,
     call,
     raise
 };
@@ -53,7 +55,11 @@ protected:
     HoldEmDeck deck;
     // hands of the players
     std::vector<CardSet<HoldEmRank, Suit> > hands;
-    
+    std::vector<CardSet<HoldEmRank, Suit> > bestCardCombination;
+
+    int bigblindInd=1;
+    int smallblindInd=0;
+
     //record if player fold
     std::vector<bool> ifFold;
     
@@ -63,7 +69,7 @@ protected:
     std::vector<int> scores;
     std::vector<int> chipsInPot;
     std::vector<int> chipsCurrentRound;
-
+    std::unordered_map<std::string,int> seats; //store the index of each player
     // virtual deal()
     virtual void deal();
 public:
