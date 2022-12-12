@@ -30,6 +30,7 @@ Errors and Warning jornals:
         the index j should be used to access vector of players[j], not the index i.
     
 
+
 Class Design:
 
     CardSet_T--------┬---- protected: vector<Card>
@@ -111,16 +112,37 @@ A comment for Pinochle:
 Design variation:
 
 PinochleGame:
-    BaseClass modification:
-    - Added a removeCard(R r, S s) in CardSet_T template class.
-    - Added a operator== in Card_T template class for iterator in remove function to compare.
-    - Added a operator[] in CardSet_T template class for random accessing vector card.
+    12:
+        BaseClass modification:
+        - Added a removeCard(R r, S s) in CardSet_T template class.
+        - Added a operator== in Card_T template class for iterator in remove function to compare.
+        - Added a operator[] in CardSet_T template class for random accessing vector card.
 
-    PinochleGame modification:
-    - Added helper function findHighestRank/findLowestRank to find the highest/lowest rank in a cardset.
-    - Added helper function findHighestRankwSuit/findLowestRankwSuit to find the highest/lowest rank according to given suit in a cardset.
-    - Added PlayThisCard, calculateScore, findFirstPlayer, checkTrumpPlayed functions to maintain a good modularity.
-    - Added bug fix function such as PrintMap, not used in final evaluation.
+        PinochleGame modification:
+        - Added helper function findHighestRank/findLowestRank to find the highest/lowest rank in a cardset.
+        - Added helper function findHighestRankwSuit/findLowestRankwSuit to find the highest/lowest rank according to given suit in a cardset.
+        - Added PlayThisCard, calculateScore, findFirstPlayer, checkTrumpPlayed functions to maintain a good modularity.
+        - Added bug fix function such as PrintMap, not used in final evaluation.
+
+HoldEmGame:
+    13: 
+        We used a 2d vector. Outer dimension is number of player, inner dimension is possible card combination. In flop it only has 1 possible combination; for turn, 
+        there are 4 possible combination; for river, it has 10 possible combination. 
+
+        For each player at each round, we can call sort to sort the possible card combination of that player.
+
+
+
+    14: bet round Design
+
+        For simplification, the first and second player will be big and small blind by default
+
+        four functions: 
+            bet(HoldEmState state)
+                - round before floop; small and big blind are automatically bet; raise must be 2 chips larger than maximumChip
+                - round after flop, raise must be 2 chips larger than maximumChip
+                - round after turn, raise must be 4 chips larger than maximumChip
+                - round after river, raise must be 4 chips larger than maximumChip
 
 
 Test Case and Results:
