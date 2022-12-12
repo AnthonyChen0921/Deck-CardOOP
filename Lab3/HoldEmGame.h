@@ -87,11 +87,13 @@ public:
     void evaluate();
 
     //bet
-    void bet(HoldEmState state);
+    void bet();
     //reset scores and chips
     void resetChips();
     HoldEmAction action(int PlayerInd);
 
+    //delete player whose score is 0
+    void kickplayer(int i);
     //nested struct 
     class HoldEmPlayer{
         public:
@@ -102,9 +104,9 @@ public:
         HoldEmPlayer();
         HoldEmPlayer(std::string n, CardSet<HoldEmRank, Suit> c, HoldEmHandRank r);
     };
+    std::string winnerName;
 
 private:
     HoldEmHandRank holdem_hand_evaluation (const CardSet<HoldEmRank, Suit> &cs);
-
 };
 

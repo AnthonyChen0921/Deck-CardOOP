@@ -131,16 +131,101 @@ HoldEmGame:
 
 
 
-    14: bet round Design
 
-        For simplification, the first and second player will be big and small blind by default
+14: bet round Design
 
-        four functions: 
-            bet(HoldEmState state)
-                - round before floop; small and big blind are automatically bet; raise must be 2 chips larger than maximumChip
-                - round after flop, raise must be 2 chips larger than maximumChip
-                - round after turn, raise must be 4 chips larger than maximumChip
-                - round after river, raise must be 4 chips larger than maximumChip
+For simplification, the first and second player will be big and small blind by default
+
+four functions: 
+    bet(HoldEmState state)
+        - round before floop; small and big blind are automatically bet; raise must be 2 chips larger than maximumChip
+        - round after flop, raise must be 2 chips larger than maximumChip
+        - round after turn, raise must be 4 chips larger than maximumChip
+        - round after river, raise must be 4 chips larger than maximumChip
+
+
+variable:
+
+    HoldEmGame::status; player status, fold/check/gaming/
+    vector<bool> ifFolded; store if player i fold his cards
+
+    vector<int> scores; store the chips in each player hand, initialized as 60;
+    vector<int> chipsInPot; keeps track of the current number of chips in the common "pot" of bets that have been made in previous betting rounds;
+    vector<int> chipsCurrentRound; keeps track of how many chips each player has bet in the current round of betting;
+    int currentRoundMaximumChip; store the maximum chip in current beting round
+    int actedPlayer; store the number of players that makes an action; set as 0 at the beginning of each round or after one raised
+
+function: 
+    in each bet round,  while raise==0, loop over each player.
+    For each player:
+        1. check if they have folded, if folded or all in, continue to nextplayer.  
+        2. For round after flop, if currentRoundMaximumChip==0, ask if choose to check;
+           if check, set ifFolded[i] as true; moved to next player, otherwise ask for action;
+        3. Ask which action the player choose to do:
+            if fold: set ifFolded[i] to true, continue to next;
+            if call: diff=currentRoundMaximumChip-chipsCurrentRound[i]; 
+                     check if scores[i] is > diff. 
+                        If yes substract diff from score and set chipsCurrentRound[i]=currentRoundMaximumChip
+                        If not, set ifFolded[i] to true. Set scores[i]=0; and chipsCurrentRound[i]=scores[i]+chipsCurrentRound[i]
+            if raise: add X to currentRoundMaximumChip; calculte difference between  
+                      check if scores[i] is > diff. 
+                        If yes substract diff from score and set chipsCurrentRound[i]=currentRoundMaximumChip
+                        If not, set ifFolded[i] to true. Set scores[i]=0; and chipsCurrentRound[i]=scores[i]+chipsCurrentRound[i] 
+        4.actedPlayer++; check if actedPlayer==number of players; 
+                    if yes:  chipsCurrentRound are added to chipsInPot and set to 0; end
+                    if not, continue to next player
+
+
+
+15. AutoMaticBet design
+    Since 'check' is a special case when maximumChip of that round is call, we didn't treat 'check'
+    - new var: 
+        enum class HoldEmGame::Action (fold/raise/call)
+
+    - strategy function:
+        HoldEmGame::Action(CardSet<HoldEmRank, Suit> hand[i], HoldEmState)
+            input: current state and cardset of player i
+            output: fold/raise/call
+            if pre-flop state:
+                - check if has a pair of Ace; if yes return raise
+                - check if has a pair of king/queen/jack; 
+                    if yes, return raise if chipsCurrentRound[i]==0 (check if this is the first bet); otherwise return call 
+                - check if two cards in hand are consective/has pair/has same suit, return call
+                - otherwise return fold    
+            if flop state:
+                - check if has three same rank; if yes return raise
+                - check if has two pair; 
+                    if yes, return raise if chipsCurrentRound[i]==0; otherwise return call 
+                - check if has 4 consective ranks/has pair/has 4 same suit, return call
+                - otherwise return fold 
+            if turn state:
+                - check if has straight(); if yes return raise
+                - check if has three same ran
+                     if yes, return raise if chipsCurrentRound[i]==0; otherwise return call 
+                - check if hasPair/hasTwoPair/hasConsective(4)/hasSameSuit(Diamond/../../Spade, 4), return call
+                - otherwise return fold 
+            if river state:
+                - check if has Straight; if yes return raise
+                - check if has Three Same Rank 
+                     if yes, return raise if chipsCurrentRound[i]==0; otherwise return call  
+                - check if has Two Pair, return call
+                - otherwise return fold 
+
+16: We are running out of time so we only consider the case that there is no 
+ indistinguishably best. In this case sum the chips in chipsInPot, 
+ add it to the scores of winner and clear chipsInPot to 0. We do these steps in 
+ resetChips.
+
+When score[i]==0, we will call a member function kickplayer(int i);
+this will remove the i th entry in:
+    - player
+    - ifFolded
+    - chipsCurrentRound
+    - chipsInPot
+    - scores
+    - hands
+When the size of player is reduced to one, end the game
+
 
 
 Test Case and Results:
@@ -369,3 +454,142 @@ Test Case and Results:
     Team 2 score: 1400
     Winner: Team 1
     ==============================
+
+    3. ====================================================
+=                 HoldEmGame                       =
+====================================================
+p1's hand: 
+A♦ 7♥ 
+
+p2's hand: 
+6♠ 9♣ 
+
+p3's hand: 
+J♠ 7♠ 
+
+p4's hand: 
+8♠ 5♣ 
+
+p5's hand: 
+3♦ K♣ 
+
+p6*'s hand: 
+8♦ 2♣ 
+
+p3's turn, chose call
+p4's turn, chose fold
+p5's turn, chose fold
+p6's turn, chose fold
+p1's turn, chose fold
+p2's turn, chose fold
+end betting round
+players not folded:
+p3
+
+Flop: 
+J♦ 2♥ K♥ 
+
+p3's turn, chose check
+end betting round
+players not folded:
+p3
+
+-------Print out from the highest ranked to the lowest player and their cards:-------------
+p5 has pair
+card in p5's hand: 
+3♦ K♣ J♦ 2♥ K♥ 
+
+p3 has pair
+card in p3's hand: 
+J♠ 7♠ J♦ 2♥ K♥ 
+
+p6 has pair
+card in p6's hand: 
+8♦ 2♣ J♦ 2♥ K♥ 
+
+p1 has xhigh
+card in p1's hand: 
+A♦ 7♥ J♦ 2♥ K♥ 
+
+p2 has xhigh
+card in p2's hand: 
+6♠ 9♣ J♦ 2♥ K♥ 
+
+p4 has xhigh
+card in p4's hand: 
+8♠ 5♣ J♦ 2♥ K♥ 
+
+Turn: 
+J♦ 2♥ K♥ 6♥ 
+
+p3's turn, chose check
+end betting round
+players not folded:
+p3
+
+-------Print out from the highest ranked to the lowest player and their cards:-------------
+p5 has pair
+card in p5's hand: 
+3♦ K♣ J♦ 2♥ K♥ 
+
+p3 has pair
+card in p3's hand: 
+J♠ 7♠ J♦ 2♥ K♥ 
+
+p2 has pair
+card in p2's hand: 
+6♠ 9♣ 6♥ 2♦ ♣ 
+
+p6 has pair
+card in p6's hand: 
+8♦ 2♣ 6♥ 2♦ ♣ 
+
+p1 has xhigh
+card in p1's hand: 
+A♦ 7♥ J♦ 2♥ K♥ 
+
+p4 has xhigh
+card in p4's hand: 
+8♠ 5♣ J♦ 2♥ K♥ 
+
+59
+58
+60
+60
+60
+60
+River: 
+J♦ 2♥ K♥ 6♥ 4♦ 
+
+
+p3's turn, chose fold
+end betting round
+players not folded:
+
+-------Print out from the highest ranked to the lowest player and their cards:-------------
+p3 has twopair
+card in p3's hand: 
+J♠ 7♠ ♣ J♠ 7♠ 
+
+p5 has pair
+card in p5's hand: 
+3♦ K♣ J♦ 2♥ K♥ 
+
+p1 has pair
+card in p1's hand: 
+A♦ 7♥ ♣ ♣ 7♥ 
+
+p2 has pair
+card in p2's hand: 
+6♠ 9♣ 6♥ 4♦ ♣ 
+
+p6 has pair
+card in p6's hand: 
+8♦ 2♣ 2♣ ♣ ♣ 
+
+p4 has xhigh
+card in p4's hand: 
+8♠ 5♣ ♣ ♣ 7♥ 
+
+winner is p3
+Do you want to end the game? (y/n)

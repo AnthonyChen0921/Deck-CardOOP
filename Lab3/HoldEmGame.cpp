@@ -203,6 +203,7 @@ void HoldEmGame::evaluate() {
         cout <<"card in "<< maxPossibleCards[i].name << "'s hand: " << endl;
         maxPossibleCards[i].hand.print(cout, GameRules::print_format_5);
     }
+    winnerName = maxPossibleCards[maxPossibleCards.size()-1].name;
 }
   
 
@@ -221,36 +222,42 @@ int HoldEmGame::play() {
 
         // reset state
         state = HoldEmState::preflop;
-
               // deal cards to each player's hand
         deal();
         printPlayersHand();
-        bet(state);
+        bet();
         
         state = HoldEmState::flop;
         // deal cards to the board in 3 rounds
         deal();
         printBoard("Flop: ");
+        bet();
         evaluate();
-        bet(state);
 
 
         state = HoldEmState::turn;
         deal();
         printBoard("Turn: ");
-        bet(state);
-
+        bet();
+        evaluate();
+        for(auto c:scores)
+            cout<<c<<endl;
         state = HoldEmState::river;
         deal();
         printBoard("River: ");
-        bet(state);
+        bet();
+        evaluate();
 
         collectCardsFromPlayer();
         collectCardsFromBoard();
+        cout<<"winner is "<<winnerName<<endl;
+        resetChips();
+
         if (askEndGame() == message::quit_game){
             return message::end_game;
         }
-        resetChips();
+        if(players.size()==1)
+            return message::end_game;
     }
 }
 
@@ -427,7 +434,7 @@ bool operator<(const HoldEmGame::HoldEmPlayer &p1, const HoldEmGame::HoldEmPlaye
 
 
 
-void HoldEmGame::bet(HoldEmState state){
+void HoldEmGame::bet(){
 
     //store how many player has taken action after raise; 
     //if that == player size, end the round
@@ -480,26 +487,18 @@ void HoldEmGame::bet(HoldEmState state){
             continue;
          }
         else{
-            //check if there is any raise
-            if(currentRoundMaximumChip==initialChip){
-                std::cout<<"Player "<<currentPlayerInd<<"'s turn, check or not? y/n"<<std::endl;
-                string input;
-                cin >> input;
-                if (input == "y" || input == "Y" || input == "yes" || input == "Yes"){
-                    currentPlayerInd++;
-                    actedPlayer++;
-                    continue;
-                }
-            }
             auto playerAction = action(currentPlayerInd);
-            std::cout<<"Player "<<currentPlayerInd<<"'s turn, chose ";
+            std::cout<<players[currentPlayerInd]<<"'s turn, chose ";
 
             if(playerAction==HoldEmAction::fold){
                 cout<<"fold"<<std::endl;
                 ifFold[currentPlayerInd]=true;
             }
             if(playerAction==HoldEmAction::call){
-                cout<<"call"<<std::endl;
+                if(currentRoundMaximumChip==0)
+                    cout<<"check"<<endl;
+                else
+                    cout<<"call"<<std::endl;
                 int diff=currentRoundMaximumChip-chipsCurrentRound[currentPlayerInd];
                 if(scores[currentPlayerInd]<diff){
                     ifFold[currentPlayerInd]=true;
@@ -531,30 +530,19 @@ void HoldEmGame::bet(HoldEmState state){
         }
     }
     //end the round
-    cout<<"end betting round, current chips in pot"<<endl;
-    for(int i=0;i<players.size();i++){
-        chipsInPot[i] += chipsCurrentRound [i];
-        chipsCurrentRound[i] = 0;
-        cout<<"player "<<i<<":" <<chipsInPot[i]<<endl;
-    }
-    cout<<"players folded:"<<endl;
-    for(int i=0;i<players.size();i++){
-        if(ifFold[i])
-            cout<<"player, "<<i<<endl;
+    cout<<"end betting round"<<endl;
+    
+    cout<<"players not folded:"<<endl;
+    for(size_t i=0;i<players.size();i++){
+        if(!ifFold[i])
+            cout<<players[i]<<endl;
     }
     cout<<endl;
     
     return;
 }
 
-void HoldEmGame::resetChips(){
-    for (int i = 0; i < static_cast<int>(players.size()); i++) {
-        ifFold[i]=false;
-        chipsInPot[i]=0;
-        chipsCurrentRound[i]=0;
-        scores[i]=HoldEmGameInitialScore;
-    }
-}
+
 
 
 HoldEmAction HoldEmGame::action(int PlayerInd){
@@ -699,3 +687,35 @@ HoldEmAction HoldEmGame::action(int PlayerInd){
     return HoldEmAction::fold;
 
 }
+
+
+
+void HoldEmGame::resetChips(){
+    int winnerInd;
+    for (int i = 0; i < static_cast<int>(players.size()); i++) {
+        if(players[i]==winnerName)
+            winnerInd = i;
+    }
+    for (int i = 0; i < static_cast<int>(players.size()); i++) {
+        ifFold[i]=false;
+        scores[winnerInd] += chipsInPot[i];
+        chipsInPot[i]=0;
+        chipsCurrentRound[i]=0;
+    }     
+    for (int i = static_cast<int>(players.size())-1;i>=0;i--) {
+        if(scores[i]=0){
+            cout<<players[i] <<" has 0 score and will be kicked out of the game" <<endl;
+            kickplayer(i);
+        }
+    }
+}
+
+ void HoldEmGame::kickplayer(int i){
+     players.erase(players.begin() + i);
+     ifFold.erase(ifFold.begin() + i);
+     chipsCurrentRound.erase(chipsCurrentRound.begin() + i);
+     chipsInPot.erase(chipsInPot.begin() + i);
+     scores.erase(scores.begin() + i);
+     hands.erase(hands.begin() + i);
+
+ }
