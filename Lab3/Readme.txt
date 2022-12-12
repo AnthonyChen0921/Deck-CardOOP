@@ -104,9 +104,7 @@ Class Design:
 
 ​                                                            
 A comment for Pinochle:
-    Neither of us had played Pinochle before, so we are somewhat confused about the speicific rules of the game (such as what should be played, what cannot be played in trick round). The rules from internet are also different from each other. So we try to follow the lab 3 instruction as much as possible. 
-    
-    There're bugs for play trick part of the PinochleGame. We are sorry for the difference between our game and the real game due to our side of the problems. But aside from that, everything else should be working fine.
+    Neither of us had played Pinochle before, so we are somewhat confused about the detailed rules of the game (such as what should be played, what cannot be played in trick round if leading card is trumpsuit/nontrumpsuit). The rules from internet are also different from each other. Aside from playTrick part, everything else should be working fine. We are sorry for the difference between our implementation and the real game.
 
 
 Design variation:

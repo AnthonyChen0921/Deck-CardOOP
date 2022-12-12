@@ -34,6 +34,16 @@ enum class HoldEmState {
     undefined
 };
 
+
+enum class HoldEmAction {
+    fold=0,
+    call,
+    raise
+};
+
+
+static const int HoldEmGameInitialScore = 60;
+
 class HoldEmGame : public Game {
     //nested struct to your HoldEmGame class
 protected:
@@ -43,8 +53,17 @@ protected:
     HoldEmDeck deck;
     // hands of the players
     std::vector<CardSet<HoldEmRank, Suit> > hands;
+    
+    //record if player fold
+    std::vector<bool> ifFold;
+    
     // store common board cards
     CardSet<HoldEmRank, Suit> board;
+    //score member
+    std::vector<int> scores;
+    std::vector<int> chipsInPot;
+    std::vector<int> chipsCurrentRound;
+
     // virtual deal()
     virtual void deal();
 public:
@@ -66,6 +85,13 @@ public:
     void printBoard(std::string s);
     //compare the cardset after flop
     void evaluate();
+
+    //bet
+    void bet(HoldEmState state);
+    //reset scores and chips
+    void resetChips();
+    HoldEmAction action(int PlayerInd);
+
     //nested struct 
     class HoldEmPlayer{
         public:
