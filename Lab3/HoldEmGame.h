@@ -62,7 +62,7 @@ protected:
 
     //record if player fold
     std::vector<bool> ifFold;
-    
+    std::vector<bool> ifAllIn;
     // store common board cards
     CardSet<HoldEmRank, Suit> board;
     //score member

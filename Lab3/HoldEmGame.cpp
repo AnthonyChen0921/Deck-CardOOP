@@ -21,6 +21,7 @@ HoldEmGame::HoldEmGame(int argc, const char *argv[]) : Game(argc, argv), state(H
     for (int i = 0; i < static_cast<int>(players.size()); i++) {
         hands.push_back(CardSet<HoldEmRank, Suit>());
         ifFold.push_back(false);
+        ifAllIn.push_back(false);
         scores.push_back(HoldEmGameInitialScore);
         chipsInPot.push_back(0);
         chipsCurrentRound.push_back(0);
@@ -204,14 +205,14 @@ void HoldEmGame::evaluate() {
     sort(maxPossibleCards.begin(),maxPossibleCards.end());
     cout<<"-------Print out from the highest ranked to the lowest player on the table and their cards:-------------"<<endl;
     for(int i=maxPossibleCards.size()-1;i>=0;i--){
-        if(!ifFold[seats[maxPossibleCards[i].name]]){
+        if( (!ifFold[seats[maxPossibleCards[i].name]])||ifAllIn[seats[maxPossibleCards[i].name]] ){
             cout << maxPossibleCards[i].name << " has "<< maxPossibleCards[i].rank<< endl;
             cout <<"card in "<< maxPossibleCards[i].name << "'s hand: " << endl;
             maxPossibleCards[i].hand.print(cout, GameRules::print_format_5);
         }   
     }
     for(int i=maxPossibleCards.size()-1;i>=0;i--){
-        if(!ifFold[seats[maxPossibleCards[i].name]]){
+        if(  (!ifFold[seats[maxPossibleCards[i].name]]) || (ifAllIn[seats[maxPossibleCards[i].name]])){
             winnerName = maxPossibleCards[i].name;
             break;
         }
@@ -229,7 +230,13 @@ void HoldEmGame::evaluate() {
 int HoldEmGame::play() {
     // repeat the following steps until the game is over:
     while (true) {
+        cout<<"---------------------------new Game start!-------------------"<<endl;
         // shuffle the deck
+        bigblindInd=rand() % players.size();
+        smallblindInd=(players.size()+bigblindInd-1)% players.size();
+        cout<<"big blind:"<<players[bigblindInd]<<endl;
+        cout<<"small blind:"<<players[smallblindInd]<<endl;
+
         deck.shuffle();
         int nfolded; //track the number of folded players
         // reset state
@@ -243,9 +250,8 @@ int HoldEmGame::play() {
         for(auto b:ifFold){
             nfolded += b;
         }
-        if(nfolded>=players.size()-1){
+        if(nfolded>=static_cast<int>(players.size()-1)){
             cout<<"only 1 player didn't fold his cards, ending the game..." <<endl;
-            cout<<"winner is "<<winnerName<<endl;
         }
         else{
 
@@ -260,9 +266,8 @@ int HoldEmGame::play() {
             for(auto b:ifFold){
                 nfolded += b;
             }
-            if(nfolded>=players.size()-1){
+            if(nfolded>=static_cast<int>(players.size()-1)){
                 cout<<"only 1 player didn't fold his cards, ending the game..." <<endl;
-                cout<<"winner is "<<winnerName<<endl;
             }
             else{
                 state = HoldEmState::turn;
@@ -274,9 +279,8 @@ int HoldEmGame::play() {
                 for(auto b:ifFold){
                     nfolded += b;
                 }
-                if(nfolded>=players.size()-1){
+                if(nfolded>=static_cast<int>(players.size()-1)){
                     cout<<"only 1 player didn't fold his cards, ending the game..." <<endl;
-                    cout<<"winner is "<<winnerName<<endl;
                 }
                 state = HoldEmState::river;
                 deal();
@@ -496,17 +500,17 @@ void HoldEmGame::bet(){
     if(state==HoldEmState::flop){
         raiseChip = 2;
         currentRoundMaximumChip=0;
-        currentPlayerInd = 2;
+        currentPlayerInd = bigblindInd+1;
     }
     if(state==HoldEmState::turn){
         raiseChip = 4;
         currentRoundMaximumChip=0;
-        currentPlayerInd = 2;
+        currentPlayerInd = bigblindInd+1;
     }
     if(state==HoldEmState::river){
         raiseChip = 4;
         currentRoundMaximumChip=0;
-        currentPlayerInd = 2;
+        currentPlayerInd = bigblindInd+1;
     }
 
 
@@ -550,6 +554,7 @@ void HoldEmGame::bet(){
                 int diff=currentRoundMaximumChip-chipsCurrentRound[currentPlayerInd];
                 if(scores[currentPlayerInd]<diff){
                     ifFold[currentPlayerInd]=true;
+                    ifAllIn[currentPlayerInd]=true;
                     chipsCurrentRound[currentPlayerInd] += scores[currentPlayerInd];
                     scores[currentPlayerInd]=0;
                 }      
@@ -612,13 +617,13 @@ HoldEmAction HoldEmGame::action(int PlayerInd){
                     if(chipsCurrentRound[PlayerInd]==0)
                         return HoldEmAction::raise;
                     else{
-                        if(!ifRaise)
+                        if((!ifRaise)&&(PlayerInd==bigblindInd))
                             return HoldEmAction::check;
                         else
                             return HoldEmAction::call;                    }
                     }
             //a pair of others
-            if(!ifRaise)
+            if((!ifRaise)&&(PlayerInd==bigblindInd))
                 return HoldEmAction::check;
             else
                 return HoldEmAction::call;
@@ -631,7 +636,7 @@ HoldEmAction HoldEmGame::action(int PlayerInd){
         //check if same suit
         if(cardsInHand[static_cast<int>(arrayIndex::firstCard)].suit== cardsInHand[static_cast<int>(arrayIndex::secondCard)].suit)
             return HoldEmAction::call;    
-        if(!ifRaise&&PlayerInd==bigblindInd)  
+        if((!ifRaise)&&(PlayerInd==bigblindInd))  
             return HoldEmAction::check;
         else
             return HoldEmAction::fold;
@@ -797,6 +802,7 @@ void HoldEmGame::resetChips(){
     }
     for (int i = 0; i < static_cast<int>(players.size()); i++) {
         ifFold[i]=false;
+        ifAllIn[i]=false;
         scores[winnerInd] += chipsInPot[i];
         chipsInPot[i]=0;
         chipsCurrentRound[i]=0;
@@ -818,6 +824,7 @@ void HoldEmGame::resetChips(){
  void HoldEmGame::kickplayer(int i){
      players.erase(players.begin() + i);
      ifFold.erase(ifFold.begin() + i);
+     ifAllIn.erase(ifAllIn.begin()+i);
      chipsCurrentRound.erase(chipsCurrentRound.begin() + i);
      chipsInPot.erase(chipsInPot.begin() + i);
      scores.erase(scores.begin() + i);

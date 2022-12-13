@@ -32,10 +32,18 @@ Errors and Warning jornals:
     2. HoleEm Game
 
     error:
+    (1)
     HoldEmGame.cpp: In member function ‘HoldEmAction HoldEmGame::action(int)’:
     HoldEmGame.cpp:588:22: error: ‘currentPlayerInd’ was not declared in this scope
          if(!ifRaise&&currentPlayerInd==bigblindInd)
     changed ‘currentPlayerInd’ to 'playerInd'
+    (2)
+        big blind:p1
+        Segmentation fault
+        That's because when bigblindInd=0; smallblindInd = -1;
+        so change to:
+                smallblindInd=(players.size()+bigblindInd-1)% players.size();
+
 
     
     warning: suggest parentheses around assignment used as truth value [-Wparentheses]
@@ -44,7 +52,8 @@ Errors and Warning jornals:
          changed to 
         if(scores[i]==0){
 
-
+    (3) There were some logical errors in the automatic bet, most of them were fixed.
+        Since we are running out of time, the case when 5 cards on board are the best is ignored.
 
 Class Design:
 
@@ -138,12 +147,8 @@ PinochleGame:
         - Added bug fix function such as PrintMap, not used in final evaluation.
 
 HoldEmGame:
-13: 
-We added a vector bestCardCombinition which stores the best possible cardset for each player
-In flop state, there are 3 cards on board and 2 cards in hand, so if we pick 5 out of 5, there is only 1 card combination.
-In turn state, there are 4 cards on board and 2 cards in hand,  6 card combination.
-In river state, there are 5 cards on board and 2 cards in hand, 21 card combination.
 
+13: 
 We used a 2d vector. Outer dimension is number of player, inner dimension is possible card combination. 
 In flop it only has 1 possible combination; 
 for turn, there are 6 possible combination; 
@@ -155,31 +160,24 @@ Then we compare the best combination of each player.
 
 14: bet round Design
 
-For simplification, the first and second player will be big and small blind by default
-
-four functions: 
-    bet(HoldEmState state)
-        - round before floop; small and big blind are automatically bet; raise must be 2 chips larger than maximumChip
-        - round after flop, raise must be 2 chips larger than maximumChip
-        - round after turn, raise must be 4 chips larger than maximumChip
-        - round after river, raise must be 4 chips larger than maximumChip
-
+We choose big blind randomly. 
+Bet starts with the player next to bigblindInd.
 
 variable:
 
     HoldEmGame::status; player status, fold/check/gaming/
     vector<bool> ifFolded; store if player i fold his cards
-
+    vector<bool> ifAllIn; store if player is all in
     vector<int> scores; store the chips in each player hand, initialized as 60;
     vector<int> chipsInPot; keeps track of the current number of chips in the common "pot" of bets that have been made in previous betting rounds;
     vector<int> chipsCurrentRound; keeps track of how many chips each player has bet in the current round of betting;
     int currentRoundMaximumChip; store the maximum chip in current beting round
     int actedPlayer; store the number of players that makes an action; set as 0 at the beginning of each round or after one raised
 
-function: 
+function bet(): 
     in each bet round,  while raise==0, loop over each player.
     For each player:
-        1. check if they have folded, if folded or all in, continue to nextplayer.  
+        1. check if they have folded or all in, if folded or all in, continue to nextplayer.  
         2. For round after flop, if currentRoundMaximumChip==0, ask if choose to check;
            if check, set ifFolded[i] as true; moved to next player, otherwise ask for action;
         3. Ask which action the player choose to do:
@@ -187,32 +185,30 @@ function:
             if call: diff=currentRoundMaximumChip-chipsCurrentRound[i]; 
                      check if scores[i] is > diff. 
                         If yes substract diff from score and set chipsCurrentRound[i]=currentRoundMaximumChip
-                        If not, set ifFolded[i] to true. Set scores[i]=0; and chipsCurrentRound[i]=scores[i]+chipsCurrentRound[i]
+                        If not, set ifFolded[i] and ifAllIn[i] to true. Set scores[i]=0; and chipsCurrentRound[i]=scores[i]+chipsCurrentRound[i]
             if raise: add X to currentRoundMaximumChip; calculte difference between  
                       check if scores[i] is > diff. 
                         If yes substract diff from score and set chipsCurrentRound[i]=currentRoundMaximumChip
-                        If not, set ifFolded[i] to true. Set scores[i]=0; and chipsCurrentRound[i]=scores[i]+chipsCurrentRound[i] 
+                        If not, set ifFolded[i] and ifAllIn[i] to true. Set scores[i]=0; and chipsCurrentRound[i]=scores[i]+chipsCurrentRound[i] 
         4.actedPlayer++; check if actedPlayer==number of players; 
                     if yes:  chipsCurrentRound are added to chipsInPot and set to 0; end
                     if not, continue to next player
 
 
 
-15. AutoMaticBet design
-    Since 'check' is a special case when maximumChip of that round is call, we didn't treat 'check'
+15. Automatic Bet design
     - new var: 
-        enum class HoldEmGame::Action (fold/raise/call)
-
+        enum class HoldEmGame::Action (check/fold/raise/call)
     - strategy function:
         HoldEmGame::Action(CardSet<HoldEmRank, Suit> hand[i], HoldEmState)
             input: current state and cardset of player i
-            output: fold/raise/call
+            output: check/fold/raise/call
             if pre-flop state:
                 - check if has a pair of Ace; if yes return raise
                 - check if has a pair of king/queen/jack; 
                     if yes, return raise if chipsCurrentRound[i]==0 (check if this is the first bet); otherwise return call 
                 - check if two cards in hand are consective/has pair/has same suit, return call
-                - otherwise return fold if there is raise/check if there is no raise    
+                - otherwise return fold if there is raise/check if there is no raise and current player is bigblink   
             if flop state:
                 - check if has three same rank; if yes return raise
                 - check if has two pair; 
@@ -241,6 +237,7 @@ When score[i]==0, we will call a member function kickplayer(int i);
 this will remove the i th entry in:
     - player
     - ifFolded
+    - ifAllIn
     - chipsCurrentRound
     - chipsInPot
     - scores
@@ -251,7 +248,23 @@ When the size of player is reduced to one, end the game
 
 Test Case and Results:
 
-1. Pinochle Game, Misdeal
+Case 1. only program name
+        > ./lab3
+        Usage: ./lab3 <Pinochle / HoldEm>  <4 players / 2-8 players>
+
+Case 2. program name and invalid game name
+        > ./lab3 random
+        Invalid Gamename
+        Usage: ./lab3 <Pinochle / HoldEm>  <4 players / 2-8 players>
+
+Case 3. program name and valid game name (Pinochle), but invalid number of players
+        > ./lab3 Pinochle player1 player2 player3
+        Invalid number of players in Pinochle, must have exactly 4 players.
+        For example: Pinochle player1 player2 player3 player4
+        Usage: ./lab3 <Pinochle / HoldEm>  <4 players / 2-8 players>
+
+
+case 4. Pinochle Game, Misdeal
 
     ==================== Test Case 1 ====================
     Rare Case: Misdeal
@@ -476,141 +489,380 @@ Test Case and Results:
     Winner: Team 1
     ==============================
 
-    3. ====================================================
+
+HoldEm Game
+case 5: Early end (all folded but only one player remains)
+[c.yunlai@shell Lab3]$ ./lab3 HoldEm p1 p2 p3 p4 p5 p6
+====================================================
 =                 HoldEmGame                       =
 ====================================================
+---------------------------new Game start!-------------------
+big blind:p2
+small blind:p1
 p1's hand: 
-A♦ 7♥ 
+Q♥ Q♠ 
 
 p2's hand: 
-6♠ 9♣ 
+K♠ 6♦ 
 
 p3's hand: 
-J♠ 7♠ 
+J♥ 6♣ 
 
 p4's hand: 
-8♠ 5♣ 
+7♣ 8♦ 
 
 p5's hand: 
-3♦ K♣ 
+7♥ 8♠ 
 
 p6*'s hand: 
-8♦ 2♣ 
+2♠ 5♠ 
 
-p3's turn, chose call
-p4's turn, chose fold
-p5's turn, chose fold
-p6's turn, chose fold
-p1's turn, chose fold
-p2's turn, chose fold
+p3's turn, he chose fold
+p4's turn, he chose call
+p5's turn, he chose call
+p6's turn, he chose call
+p1's turn, he chose call
+p2's turn, he chose check
 end betting round
 players not folded:
-p3
+p1
+p2
+p4
+p5
+p6
 
 Flop: 
-J♦ 2♥ K♥ 
+9♦ Q♣ 4♦ 
 
-p3's turn, chose check
+p4's turn, he chose check
+p5's turn, he chose check
+p6's turn, he chose check
+p1's turn, he chose raise
+p2's turn, he chose fold
+p4's turn, he chose fold
+p5's turn, he chose fold
+p6's turn, he chose fold
 end betting round
 players not folded:
+p1
+
+-------Print out from the highest ranked to the lowest player on the table and their cards:-------------
+p1 has threeofakind
+card in p1's hand: 
+Q♥ Q♠ 9♦ Q♣ 4♦ 
+
+only 1 player didn't fold his cards, ending the game...
+winner is p1
+----------------------------reseting the chips------------------------------------
+p1 has 68 chips after this game
+p2 has 58 chips after this game
+p3 has 60 chips after this game
+p4 has 58 chips after this game
+p5 has 58 chips after this game
+p6 has 58 chips after this game
+Do you want to end the game? (y/n)
+
+
+
+
+
+Test case 6: 
+    When both player has good card, they will keep calling until all in. 
+    And loser will lose all his chips and be kiced out of the game, which is this case:
+---------------------------new Game start!-------------------
+big blind:p2
+small blind:p1
+p1's hand: 
+7♠ 8♠ 
+
+p2's hand: 
+8♣ Q♣ 
+
+p3's hand: 
+9♦ 4♦ 
+
+p4's hand: 
+K♣ 10♠ 
+
+p5*'s hand: 
+3♥ J♥ 
+
+p6's hand: 
+10♣ 2♣ 
+
+p3's turn, he chose call
+p4's turn, he chose fold
+p5's turn, he chose call
+p6's turn, he chose call
+p1's turn, he chose call
+p2's turn, he chose call
+end betting round
+players not folded:
+p1
+p2
 p3
+p5
+p6
 
--------Print out from the highest ranked to the lowest player and their cards:-------------
-p5 has pair
-card in p5's hand: 
-3♦ K♣ J♦ 2♥ K♥ 
+Flop: 
+6♥ K♥ Q♦ 
 
-p3 has pair
-card in p3's hand: 
-J♠ 7♠ J♦ 2♥ K♥ 
+p3's turn, he chose check
+p5's turn, he chose check
+p6's turn, he chose check
+p1's turn, he chose check
+p2's turn, he chose check
+end betting round
+players not folded:
+p1
+p2
+p3
+p5
+p6
 
-p6 has pair
-card in p6's hand: 
-8♦ 2♣ J♦ 2♥ K♥ 
+-------Print out from the highest ranked to the lowest player on the table and their cards:-------------
+p2 has pair
+card in p2's hand: 
+8♣ Q♣ 6♥ K♥ Q♦ 
 
 p1 has xhigh
 card in p1's hand: 
-A♦ 7♥ J♦ 2♥ K♥ 
+7♠ 8♠ 6♥ K♥ Q♦ 
 
-p2 has xhigh
-card in p2's hand: 
-6♠ 9♣ J♦ 2♥ K♥ 
+p3 has xhigh
+card in p3's hand: 
+9♦ 4♦ 6♥ K♥ Q♦ 
 
-p4 has xhigh
-card in p4's hand: 
-8♠ 5♣ J♦ 2♥ K♥ 
+p5 has xhigh
+card in p5's hand: 
+3♥ J♥ 6♥ K♥ Q♦ 
+
+p6 has xhigh
+card in p6's hand: 
+10♣ 2♣ 6♥ K♥ Q♦ 
 
 Turn: 
-J♦ 2♥ K♥ 6♥ 
+6♥ K♥ Q♦ J♦ 
 
-p3's turn, chose check
+p3's turn, he chose check
+p5's turn, he chose check
+p6's turn, he chose check
+p1's turn, he chose check
+p2's turn, he chose check
 end betting round
 players not folded:
+p1
+p2
 p3
+p5
+p6
 
--------Print out from the highest ranked to the lowest player and their cards:-------------
-p5 has pair
-card in p5's hand: 
-3♦ K♣ J♦ 2♥ K♥ 
-
-p3 has pair
-card in p3's hand: 
-J♠ 7♠ J♦ 2♥ K♥ 
-
+-------Print out from the highest ranked to the lowest player on the table and their cards:-------------
 p2 has pair
 card in p2's hand: 
-6♠ 9♣ 6♥ 2♦ ♣ 
+8♣ Q♣ K♥ Q♦ J♦ 
 
-p6 has pair
-card in p6's hand: 
-8♦ 2♣ 6♥ 2♦ ♣ 
+p5 has pair
+card in p5's hand: 
+J♥ 6♥ K♥ Q♦ J♦ 
 
 p1 has xhigh
 card in p1's hand: 
-A♦ 7♥ J♦ 2♥ K♥ 
+7♠ 8♠ K♥ Q♦ J♦ 
 
-p4 has xhigh
-card in p4's hand: 
-8♠ 5♣ J♦ 2♥ K♥ 
+p6 has xhigh
+card in p6's hand: 
+10♣ 6♥ K♥ Q♦ J♦ 
 
-59
-58
-60
-60
-60
-60
+p3 has xhigh
+card in p3's hand: 
+9♦ 6♥ K♥ Q♦ J♦ 
+
 River: 
-J♦ 2♥ K♥ 6♥ 4♦ 
+6♥ K♥ Q♦ J♦ A♦ 
 
 
-p3's turn, chose fold
+p3's turn, he chose raise
+p5's turn, he chose fold
+p6's turn, he chose raise
+p1's turn, he chose fold
+p2's turn, he chose fold
+p3's turn, he chose raise
+p6's turn, he chose raise
+p3's turn, he chose raise
+p6's turn, he chose raise
+p3's turn, he chose raise
+p6's turn, he chose raise
+p3's turn, he chose raise
+p6's turn, he chose raise
+p3's turn, he chose raise
+p6's turn, he chose raise
+p3's turn, he chose raise
+p6's turn, he chose raise
+p3's turn, he chose raise
+p6's turn, he chose raise
 end betting round
 players not folded:
 
--------Print out from the highest ranked to the lowest player and their cards:-------------
-p3 has twopair
+-------Print out from the highest ranked to the lowest player on the table and their cards:-------------
+p3 has flush
 card in p3's hand: 
-J♠ 7♠ ♣ J♠ 7♠ 
+9♦ 4♦ Q♦ J♦ A♦ 
+
+p6 has straight
+card in p6's hand: 
+10♣ K♥ Q♦ J♦ A♦ 
+
+winner is p3
+----------------------------reseting the chips------------------------------------
+p1 has 48 chips after this game
+p2 has 54 chips after this game
+p3 has 126 chips after this game
+p4 has 57 chips after this game
+p5 has 75 chips after this game
+p6 has 0 chips after this game
+p6 has 0 score and will be kicked out of the game, he is No.6
+Do you want to end the game? (y/n)
+
+
+Test case 7: After 1 player is kicked out. Tried until 2nd player is kicked out:
+---------------------------new Game start!-------------------
+big blind:p4
+small blind:p3
+p1's hand: 
+J♠ K♠ 
+
+p2's hand: 
+J♦ Q♥ 
+
+p3's hand: 
+8♣ Q♦ 
+
+p4's hand: 
+10♠ Q♣ 
+
+p5*'s hand: 
+4♦ 2♦ 
+
+p5's turn, he chose call
+p1's turn, he chose call
+p2's turn, he chose call
+p3's turn, he chose fold
+p4's turn, he chose check
+end betting round
+players not folded:
+p1
+p2
+p4
+p5
+
+Flop: 
+3♥ J♥ 3♦ 
+
+p5's turn, he chose check
+p1's turn, he chose check
+p2's turn, he chose check
+p4's turn, he chose check
+end betting round
+players not folded:
+p1
+p2
+p4
+p5
+
+-------Print out from the highest ranked to the lowest player on the table and their cards:-------------
+p1 has twopair
+card in p1's hand: 
+J♠ K♠ 3♥ J♥ 3♦ 
+
+p2 has twopair
+card in p2's hand: 
+J♦ Q♥ 3♥ J♥ 3♦ 
+
+p4 has pair
+card in p4's hand: 
+10♠ Q♣ 3♥ J♥ 3♦ 
 
 p5 has pair
 card in p5's hand: 
-3♦ K♣ J♦ 2♥ K♥ 
+4♦ 2♦ 3♥ J♥ 3♦ 
 
-p1 has pair
-card in p1's hand: 
-A♦ 7♥ ♣ ♣ 7♥ 
+Turn: 
+3♥ J♥ 3♦ 3♠ 
 
-p2 has pair
+p5's turn, he chose raise
+p1's turn, he chose raise
+p2's turn, he chose raise
+p4's turn, he chose raise
+p5's turn, he chose call
+p1's turn, he chose call
+p2's turn, he chose call
+end betting round
+players not folded:
+p1
+p2
+p4
+p5
+
+-------Print out from the highest ranked to the lowest player on the table and their cards:-------------
+p2 has fullhouse
 card in p2's hand: 
-6♠ 9♣ 6♥ 4♦ ♣ 
+J♦ 3♥ J♥ 3♦ 3♠ 
 
-p6 has pair
-card in p6's hand: 
-8♦ 2♣ 2♣ ♣ ♣ 
+p1 has fullhouse
+card in p1's hand: 
+J♠ 3♥ J♥ 3♦ 3♠ 
 
-p4 has xhigh
+p5 has threeofakind
+card in p5's hand: 
+2♦ 3♥ J♥ 3♦ 3♠ 
+
+p4 has threeofakind
 card in p4's hand: 
-8♠ 5♣ ♣ ♣ 7♥ 
+Q♣ 3♥ J♥ 3♦ 3♠ 
 
-winner is p3
+River: 
+3♥ J♥ 3♦ 3♠ 9♦ 
+
+
+p5's turn, he chose raise
+p1's turn, he chose raise
+p2's turn, he chose raise
+p4's turn, he chose raise
+p5's turn, he chose call
+p1's turn, he chose raise
+p2's turn, he chose raise
+p4's turn, he chose call
+p5's turn, he chose call
+end betting round
+players not folded:
+p4
+p5
+
+-------Print out from the highest ranked to the lowest player on the table and their cards:-------------
+p2 has fullhouse
+card in p2's hand: 
+J♦ 3♥ J♥ 3♦ 3♠ 
+
+p1 has fullhouse
+card in p1's hand: 
+J♠ 3♥ J♥ 3♦ 3♠ 
+
+p5 has threeofakind
+card in p5's hand: 
+4♦ 2♦ 3♥ 3♦ 3♠ 
+
+p4 has threeofakind
+card in p4's hand: 
+10♠ Q♣ 3♥ 3♦ 3♠ 
+
+winner is p2
+----------------------------reseting the chips------------------------------------
+p1 has 0 chips after this game
+p2 has 152 chips after this game
+p3 has 185 chips after this game
+p4 has 16 chips after this game
+p5 has 7 chips after this game
+p1 has 0 score and will be kicked out of the game, he is No.5
 Do you want to end the game? (y/n)
+
